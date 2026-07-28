@@ -2,14 +2,11 @@ package com.example.api
 
 import android.graphics.Bitmap
 import android.util.Base64
-import android.util.Log
 import com.example.data.Group
 import com.example.data.Person
 import com.example.data.SocialEvent
 import com.example.data.Memory
 import com.squareup.moshi.JsonClass
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.io.ByteArrayOutputStream
 
 // --- Extracted Unified Personal CRM Suggestion Models ---
@@ -17,64 +14,58 @@ import java.io.ByteArrayOutputStream
 @JsonClass(generateAdapter = true)
 data class ExtractedPerson(
     val name: String,
-    val confidence_state: String = "suggested",
-    val evidence: String? = null
+    val confidenceState: String,
+    val evidence: String
 )
 
 @JsonClass(generateAdapter = true)
 data class ExtractedEvent(
     val title: String,
-    val date_text: String? = null,
-    val resolved_date: String? = null, // "YYYY-MM-DD"
-    val time_text: String? = null,
+    val dateText: String? = null,
+    val resolvedDate: String? = null, // "YYYY-MM-DD"
+    val timeText: String? = null,
     val location: String? = null,
     val people: List<String> = emptyList(),
-    val confidence_state: String = "suggested",
-    val evidence: String? = null
+    val confidenceState: String,
+    val evidence: String
 )
 
 @JsonClass(generateAdapter = true)
 data class ExtractedMemory(
-    val person: String?,
+    val person: String? = null,
     val content: String,
-    val memory_type: String, // "life_update", "preference", "relationship", "event_context", "follow_up", "general_note"
-    val confidence_state: String = "suggested",
-    val evidence: String? = null
+    val memoryType: String, // "life_update", "preference", "relationship", "event_context", "follow_up", "general_note"
+    val confidenceState: String,
+    val evidence: String
 )
 
 @JsonClass(generateAdapter = true)
 data class ExtractedRelationship(
-    val person_a: String,
-    val person_b: String,
-    val relationship_type: String, // "spouse", "sibling", "coworker", "friend", "met_through"
-    val confidence_state: String = "suggested",
-    val evidence: String? = null
+    val personA: String,
+    val personB: String,
+    val relationshipType: String, // "spouse", "sibling", "coworker", "friend", "met_through"
+    val confidenceState: String,
+    val evidence: String
 )
 
 @JsonClass(generateAdapter = true)
 data class ExtractedReminder(
     val title: String,
-    val due_text: String? = null,
-    val confidence_state: String = "suggested",
-    val evidence: String? = null
+    val dueText: String? = null,
+    val confidenceState: String,
+    val evidence: String
 )
 
 @JsonClass(generateAdapter = true)
 data class ExtractionResult(
-    val people: List<ExtractedPerson> = emptyList(),
-    val events: List<ExtractedEvent> = emptyList(),
-    val memories: List<ExtractedMemory> = emptyList(),
-    val relationships: List<ExtractedRelationship> = emptyList(),
-    val reminders: List<ExtractedReminder> = emptyList()
+    val people: List<ExtractedPerson>,
+    val events: List<ExtractedEvent>,
+    val memories: List<ExtractedMemory>,
+    val relationships: List<ExtractedRelationship>,
+    val reminders: List<ExtractedReminder>
 )
 
 object GeminiClient {
-    private const val TAG = "GeminiClient"
-
-    private val moshi = Moshi.Builder()
-        .add(KotlinJsonAdapterFactory())
-        .build()
-
     private fun Bitmap.toBase64(): String {
         val outputStream = ByteArrayOutputStream()
         this.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
@@ -126,12 +117,7 @@ object GeminiClient {
             Provide a helpful, precise, and concise answer. If you don't know the answer, say so.
         """.trimIndent()
 
-        return try {
-            SecureAiGateway.generate(prompt = prompt)
-        } catch (e: Exception) {
-            Log.e(TAG, "Secure AI request failed", e)
-            "AI is unavailable. Check your connection and sign-in status."
-        }
+        return SecureAiGateway.generate(prompt = prompt)
     }
 
     suspend fun extractFromCapture(
@@ -161,19 +147,19 @@ object GeminiClient {
               "people": [
                 {
                   "name": "Michelle (use canonical name if found in existing CRM)",
-                  "confidence_state": "suggested",
+                  "confidenceState": "suggested",
                   "evidence": "Michelle's birthday dinner"
                 }
               ],
               "events": [
                 {
                   "title": "Michelle's Birthday Dinner",
-                  "date_text": "next Saturday",
-                  "resolved_date": "2026-06-13",
-                  "time_text": "7pm",
+                  "dateText": "next Saturday",
+                  "resolvedDate": "2026-06-13",
+                  "timeText": "7pm",
                   "location": "Bar Isabel",
                   "people": ["Michelle", "Alex", "Sarah"],
-                  "confidence_state": "needs_review",
+                  "confidenceState": "needs_review",
                   "evidence": "Michelle's birthday dinner is next Saturday at 7pm at Bar Isabel"
                 }
               ],
@@ -181,25 +167,25 @@ object GeminiClient {
                 {
                   "person": "Sarah",
                   "content": "Sarah cannot attend because she is moving.",
-                  "memory_type": "life_update",
-                  "confidence_state": "suggested",
+                  "memoryType": "life_update",
+                  "confidenceState": "suggested",
                   "evidence": "Sarah can't make it because she is moving"
                 }
               ],
               "relationships": [
                 {
-                  "person_a": "Alex",
-                  "person_b": "Michelle",
-                  "relationship_type": "friend",
-                  "confidence_state": "suggested",
+                  "personA": "Alex",
+                  "personB": "Michelle",
+                  "relationshipType": "friend",
+                  "confidenceState": "suggested",
                   "evidence": "Michelle and Alex both attending"
                 }
               ],
               "reminders": [
                 {
                   "title": "Ask Sarah about her move",
-                  "due_text": "next week",
-                  "confidence_state": "suggested",
+                  "dueText": "next week",
+                  "confidenceState": "suggested",
                   "evidence": "Sarah can't make it because she is moving"
                 }
               ]
@@ -207,25 +193,20 @@ object GeminiClient {
 
             Rules:
             1. Keep names short and canonical (e.g. "Michelle", "Alex Chen"). Match them to "Existing People" if possible, especially resolving nicknames.
-            2. Match "memory_type" with one of: "life_update", "preference", "relationship", "event_context", "follow_up", "general_note".
-            3. Match "relationship_type" with one of: "spouse", "sibling", "coworker", "friend", "met_through".
+            2. Match "memoryType" with one of: "life_update", "preference", "relationship", "event_context", "follow_up", "general_note".
+            3. Match "relationshipType" with one of: "spouse", "sibling", "coworker", "friend", "met_through".
             4. If a Circle/Group is mentioned, include it in the analysis (e.g. under Title/Content).
             5. Make sure output is raw parseable JSON only. Do not enclose it in markdown blocks.
         """.trimIndent()
 
-        return try {
-            val jsonText = SecureAiGateway.generate(
-                prompt = prompt,
-                systemInstruction = "You are an expert Social Brain / Personal CRM AI extractor designed to parse social signals. Return valid JSON only.",
-                responseMimeType = "application/json",
-                image = screenshot?.let { SecureAiGateway.InlineImage("image/jpeg", it.toBase64()) }
-            )
-            val adapter = moshi.adapter(ExtractionResult::class.java)
-            adapter.fromJson(jsonText) ?: generateFallback(textNote ?: "Screenshot Capture")
-        } catch (e: Exception) {
-            Log.e(TAG, "Secure AI extraction failed", e)
-            generateFallback(textNote ?: "Screenshot Capture")
-        }
+        val jsonText = SecureAiGateway.generate(
+            prompt = prompt,
+            systemInstruction = "You are an expert Social Brain / Personal CRM AI extractor designed to parse social signals. Return valid JSON only.",
+            responseMimeType = "application/json",
+            image = screenshot?.let { SecureAiGateway.InlineImage("image/jpeg", it.toBase64()) }
+        )
+        return ExtractionContract.parse(jsonText)
+            ?: throw IllegalStateException("AI returned an invalid extraction result.")
     }
 
     private fun generateFallback(rawInput: String): ExtractionResult {
@@ -260,11 +241,11 @@ object GeminiClient {
             eventsList.add(
                 ExtractedEvent(
                     title = "Michelle's Birthday Dinner",
-                    date_text = "Saturday",
-                    time_text = "7:00 PM",
+                    dateText = "Saturday",
+                    timeText = "7:00 PM",
                     location = "Bar Isabel",
                     people = peopleList.map { it.name },
-                    confidence_state = "needs_review",
+                    confidenceState = "needs_review",
                     evidence = "Extracted birthday dinner"
                 )
             )
@@ -272,11 +253,11 @@ object GeminiClient {
             eventsList.add(
                 ExtractedEvent(
                     title = "Paddle BBQ",
-                    date_text = "Sunday",
-                    time_text = "2:00 PM",
+                    dateText = "Sunday",
+                    timeText = "2:00 PM",
                     location = "Hanlan's Point",
                     people = peopleList.map { it.name },
-                    confidence_state = "needs_review",
+                    confidenceState = "needs_review",
                     evidence = "Extracted paddle bbq"
                 )
             )
@@ -288,8 +269,8 @@ object GeminiClient {
                 ExtractedMemory(
                     person = "Alex Chen",
                     content = "Going to Japan in September",
-                    memory_type = "life_update",
-                    confidence_state = "suggested",
+                    memoryType = "life_update",
+                    confidenceState = "suggested",
                     evidence = "Alex and Michelle starting trip to Japan"
                 )
             )
@@ -299,8 +280,8 @@ object GeminiClient {
                 ExtractedMemory(
                     person = "Sarah",
                     content = "Sarah is moving and cannot attend upcoming dinner",
-                    memory_type = "life_update",
-                    confidence_state = "suggested",
+                    memoryType = "life_update",
+                    confidenceState = "suggested",
                     evidence = "Sarah is moving out of town"
                 )
             )
@@ -310,8 +291,8 @@ object GeminiClient {
                 ExtractedMemory(
                     person = "Brian",
                     content = "Brian injured his shoulder in paddling",
-                    memory_type = "life_update",
-                    confidence_state = "suggested",
+                    memoryType = "life_update",
+                    confidenceState = "suggested",
                     evidence = "Brian shoulder injury"
                 )
             )
@@ -321,10 +302,10 @@ object GeminiClient {
         if (input.contains("spouse") || input.contains("partner") || (input.contains("alex") && input.contains("michelle"))) {
             relationshipsList.add(
                 ExtractedRelationship(
-                    person_a = "Alex Chen",
-                    person_b = "Michelle",
-                    relationship_type = "spouse",
-                    confidence_state = "needs_review",
+                    personA = "Alex Chen",
+                    personB = "Michelle",
+                    relationshipType = "spouse",
+                    confidenceState = "needs_review",
                     evidence = "Implied core partnership"
                 )
             )
@@ -332,13 +313,13 @@ object GeminiClient {
 
         // Spot reminders
         if (input.contains("hotel") || input.contains("kyoto")) {
-            remindersList.add(ExtractedReminder("Ask Alex and Michelle about Kyoto hotel", "Next meet-up"))
+            remindersList.add(ExtractedReminder("Ask Alex and Michelle about Kyoto hotel", "Next meet-up", "suggested", "Kyoto hotels were mentioned."))
         }
         if (input.contains("shoulder") || input.contains("brian")) {
-            remindersList.add(ExtractedReminder("Ask Brian how his shoulder is feeling", "Sunday"))
+            remindersList.add(ExtractedReminder("Ask Brian how his shoulder is feeling", "Sunday", "suggested", "Brian's shoulder was mentioned."))
         }
         if (input.contains("sarah") || input.contains("move")) {
-            remindersList.add(ExtractedReminder("Ask Sarah about her new move", "Saturday"))
+            remindersList.add(ExtractedReminder("Ask Sarah about her new move", "Saturday", "suggested", "Sarah's move was mentioned."))
         }
 
         // Default item if input is very generic
@@ -348,12 +329,12 @@ object GeminiClient {
                 ExtractedMemory(
                     person = "Alex Chen",
                     content = rawInput.take(200),
-                    memory_type = "general_note",
-                    confidence_state = "suggested",
+                    memoryType = "general_note",
+                    confidenceState = "suggested",
                     evidence = "Captured text notes"
                 )
             )
-            remindersList.add(ExtractedReminder("Follow up regarding: " + rawInput.take(30) + "..."))
+            remindersList.add(ExtractedReminder("Follow up regarding: " + rawInput.take(30) + "...", null, "needs_review", "Captured text needs manual review."))
         }
 
         return ExtractionResult(

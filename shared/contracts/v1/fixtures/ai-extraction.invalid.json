@@ -1,0 +1,13 @@
+{
+  "people": [
+    {
+      "name": "Michelle",
+      "confidence_state": "suggested",
+      "evidence": "Uses the deprecated snake_case field."
+    }
+  ],
+  "events": [],
+  "memories": [],
+  "relationships": [],
+  "reminders": []
+}

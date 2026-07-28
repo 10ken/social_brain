@@ -5,15 +5,19 @@ import Security
 enum ContentCipherError: Error {
     case invalidKeyLength
     case invalidCombinedCiphertext
+    case randomGenerationFailed(OSStatus)
     case keychain(OSStatus)
 }
 
 enum ContentCipher {
     static let keyByteCount = 32
 
-    static func generateKey() -> Data {
+    static func generateKey() throws -> Data {
         var bytes = Data(count: keyByteCount)
-        _ = bytes.withUnsafeMutableBytes { SecRandomCopyBytes(kSecRandomDefault, keyByteCount, $0.baseAddress!) }
+        let status = bytes.withUnsafeMutableBytes {
+            SecRandomCopyBytes(kSecRandomDefault, keyByteCount, $0.baseAddress!)
+        }
+        guard status == errSecSuccess else { throw ContentCipherError.randomGenerationFailed(status) }
         return bytes
     }
 
@@ -32,26 +36,33 @@ enum ContentCipher {
 }
 
 enum KeychainStore {
-    static func save(_ data: Data, account: String) throws {
-        let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrAccount as String: account]
-        SecItemDelete(query as CFDictionary)
+    static let defaultService = "com.aistudio.socialbrain"
+
+    static func save(_ data: Data, account: String, service: String = defaultService) throws {
+        let query = baseQuery(account: account, service: service)
         let addQuery: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: account,
+            kSecAttrService as String: service,
             kSecValueData as String: data,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+            kSecAttrSynchronizable as String: kCFBooleanFalse as Any
         ]
         let status = SecItemAdd(addQuery as CFDictionary, nil)
-        guard status == errSecSuccess else { throw ContentCipherError.keychain(status) }
+        if status == errSecDuplicateItem {
+            let updateStatus = SecItemUpdate(query as CFDictionary, [kSecValueData as String: data] as CFDictionary)
+            guard updateStatus == errSecSuccess else { throw ContentCipherError.keychain(updateStatus) }
+        } else {
+            guard status == errSecSuccess else { throw ContentCipherError.keychain(status) }
+        }
     }
 
-    static func load(account: String) throws -> Data? {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: account,
+    static func load(account: String, service: String = defaultService) throws -> Data? {
+        var query = baseQuery(account: account, service: service)
+        query.merge([
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne
-        ]
+        ]) { _, new in new }
         var item: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &item)
         if status == errSecItemNotFound { return nil }
@@ -59,16 +70,18 @@ enum KeychainStore {
         return data
     }
 
-    static func delete(account: String) throws {
-        let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrAccount as String: account]
+    static func delete(account: String, service: String = defaultService) throws {
+        let query = baseQuery(account: account, service: service)
         let status = SecItemDelete(query as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else { throw ContentCipherError.keychain(status) }
     }
-}
 
-/// Implement this using the same audited Argon2id library and versioned parameters on iOS and Android.
-/// The passphrase itself must never enter Firebase, Keychain, or Android Keystore.
-protocol PassphraseKeyWrapping {
-    func wrap(contentKey: Data, passphrase: String) throws -> Data
-    func unwrap(wrappedKey: Data, passphrase: String) throws -> Data
+    private static func baseQuery(account: String, service: String) -> [String: Any] {
+        [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: account,
+            kSecAttrService as String: service,
+            kSecAttrSynchronizable as String: kCFBooleanFalse as Any
+        ]
+    }
 }

@@ -5,6 +5,20 @@ Do not commit `.firebaserc`, `google-services.json`, `GoogleService-Info.plist`,
 or secrets.
 
 Before deployment, enable Apple and Google authentication, configure App Check,
-set the `GEMINI_API_KEY` Functions secret, and deploy from this directory.
-Firestore only receives encrypted envelopes. The AI callable endpoint relays a
-user-initiated prompt and does not persist request content.
+set the `GEMINI_API_KEY` Functions secret, and deploy from this directory:
+
+```bash
+firebase functions:secrets:set GEMINI_API_KEY
+npm --prefix functions ci
+npm --prefix functions run lint
+npm --prefix functions run build
+firebase deploy
+```
+
+`generateAIContent` requires both a Firebase user and App Check. It accepts a
+bounded text prompt plus an optional image, and validates structured AI output
+before returning it. It does not write prompt or response content to Firestore.
+
+Firestore and Storage rules explicitly deny client record and attachment sync in
+this release. Do not enable or advertise sync until a portable key-recovery
+design is approved and independently reviewed.

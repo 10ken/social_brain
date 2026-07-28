@@ -12,12 +12,14 @@ import androidx.compose.ui.Modifier
 import com.example.ui.AppViewModel
 import com.example.ui.screens.MainAppContainer
 import com.example.ui.theme.MyApplicationTheme
+import com.example.api.SecureAiGateway
 
 class MainActivity : ComponentActivity() {
     private val viewModel: AppViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        SecureAiGateway.initializeAppCheck()
         enableEdgeToEdge()
         setContent {
             val appSettings = viewModel.appSettings.collectAsStateWithLifecycle()

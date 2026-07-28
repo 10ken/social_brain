@@ -2,22 +2,33 @@
 <img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
 </div>
 
-# Run and deploy your AI Studio app
+# Social Brain
 
-This contains everything you need to run your app locally.
+Social Brain is a local-first private memory assistant for people, events,
+follow-ups, and reviewed captures. The Android app and the iOS 17+ SwiftUI
+source live in this repository; Firebase only provides authenticated AI
+processing. Cross-device content sync is deliberately disabled in the current
+release because device-specific encryption keys are not portable between
+Android and iOS.
 
-View your app in AI Studio: https://ai.studio/apps/c640fc18-446f-492f-80a4-8f7f7de4206a
+## Android
 
-## Run Locally
+Open the repository in Android Studio. Add a local `app/google-services.json`,
+then configure Firebase Auth, App Check, and the Functions secret as described
+in [`firebase/README.md`](firebase/README.md). AI is intentionally unavailable
+until the user signs in and the Firebase project is configured.
 
-**Prerequisites:**  [Android Studio](https://developer.android.com/studio)
+## iOS
 
+The native iOS source and its XcodeGen project definition are in
+[`ios`](ios). It is designed for iOS 17+. Once full Xcode is available, follow
+the setup and validation checklist in [`ios/README.md`](ios/README.md).
 
-1. Open Android Studio
-2. Select **Open** and choose the directory containing this project
-3. Allow Android Studio to fix any incompatibilities as it imports the project.
-4. Create a Firebase Android app for `com.aistudio.socialmemory.pcrzml` and place its generated `google-services.json` in `app/` (the file is intentionally ignored by Git).
-5. Deploy the Functions in [`firebase`](firebase), including the `GEMINI_API_KEY` secret. The mobile app never contains this key.
-6. Enable Google and Apple authentication, Firestore, Storage, and App Check in the Firebase project.
-7. Remove this line from the app's `build.gradle.kts` file: `signingConfig = signingConfigs.getByName("debugConfig")` if you do not have the repository debug keystore.
-8. Run the app on an emulator or physical device and sign in before using AI features.
+## Development notes
+
+- Do not commit Firebase plist/json configuration, secrets, generated build
+  products, or dependency directories.
+- On iOS, imported capture payloads and attachments are encrypted with a
+  device-specific key. The in-app **Start Clean** action deletes local records,
+  encrypted files, and encryption material.
+- Firebase AI requests are user initiated and are not persisted by the app.

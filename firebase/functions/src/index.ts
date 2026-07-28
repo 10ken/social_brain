@@ -4,75 +4,105 @@ import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
+import { requireAuthenticatedUser, AuthenticationRequiredError } from "./aiAuth.js";
+import {
+  AIContractValidationError,
+  AIResponseSizeError,
+  ensureAIResponseWithinLimit,
+  parseAIExtractionOutput,
+} from "./aiContract.js";
+import { AIRequestValidationError, parseAIRequest } from "./aiRequest.js";
+import {
+  AI_RATE_LIMIT_WINDOW_MS,
+  evaluateAIRequestRateLimit,
+  type AIRequestRateLimitState,
+} from "./aiRateLimit.js";
 
 initializeApp();
 
 const geminiApiKey = defineSecret("GEMINI_API_KEY");
-const maximumPromptBytes = 250_000;
 
-type AIRequest = {
-  prompt: string;
-  systemInstruction?: string;
-  responseMimeType?: "application/json" | "text/plain";
-  image?: { mimeType: string; dataBase64: string };
-};
-
-function requireAuthenticatedRequest(auth: unknown): asserts auth is { uid: string } {
-  if (!auth || typeof auth !== "object" || !("uid" in auth)) {
-    throw new HttpsError("unauthenticated", "Sign in before using AI features.");
+function mapRequestError(error: unknown): never {
+  if (error instanceof AuthenticationRequiredError) {
+    throw new HttpsError("unauthenticated", error.message);
   }
+  if (error instanceof AIRequestValidationError) {
+    throw new HttpsError("invalid-argument", error.message);
+  }
+  if (error instanceof AIContractValidationError) {
+    throw new HttpsError("failed-precondition", "AI returned an invalid extraction result. Try again.");
+  }
+  if (error instanceof AIResponseSizeError) {
+    throw new HttpsError("resource-exhausted", "AI response exceeded a safe size. Try again.");
+  }
+  if (error instanceof HttpsError) throw error;
+  throw new HttpsError("unavailable", "AI processing is temporarily unavailable.");
 }
 
-function parseAIRequest(value: unknown): AIRequest {
-  if (!value || typeof value !== "object") {
-    throw new HttpsError("invalid-argument", "A request payload is required.");
-  }
-  const request = value as Partial<AIRequest>;
-  if (typeof request.prompt !== "string" || request.prompt.trim().length === 0) {
-    throw new HttpsError("invalid-argument", "A non-empty prompt is required.");
-  }
-  if (Buffer.byteLength(request.prompt, "utf8") > maximumPromptBytes) {
-    throw new HttpsError("invalid-argument", "Prompt exceeds the allowed size.");
-  }
-  if (request.systemInstruction !== undefined && typeof request.systemInstruction !== "string") {
-    throw new HttpsError("invalid-argument", "systemInstruction must be text.");
-  }
-  if (request.image !== undefined) {
-    if (typeof request.image !== "object" || typeof request.image.mimeType !== "string" ||
-      typeof request.image.dataBase64 !== "string" || !request.image.mimeType.startsWith("image/")) {
-      throw new HttpsError("invalid-argument", "image must contain an image MIME type and base64 data.");
+function readRateLimitState(value: unknown): AIRequestRateLimitState | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const data = value as Record<string, unknown>;
+  const windowStartedAtMs = data.windowStartedAtMs;
+  const requestCount = data.requestCount;
+  if (typeof windowStartedAtMs !== "number" || typeof requestCount !== "number") return undefined;
+  return { windowStartedAtMs, requestCount };
+}
+
+/** Uses Firestore transactions so quota is enforced across concurrent instances. */
+async function takeAIRequestRateLimitSlot(userId: string): Promise<void> {
+  const db = getFirestore();
+  const limitRef = db.collection("internalAiRateLimits").doc(userId);
+  const decision = await db.runTransaction(async (transaction) => {
+    const current = readRateLimitState((await transaction.get(limitRef)).data());
+    const next = evaluateAIRequestRateLimit(current, Date.now());
+    if (next.allowed) {
+      transaction.set(limitRef, {
+        windowStartedAtMs: next.nextState.windowStartedAtMs,
+        requestCount: next.nextState.requestCount,
+        expiresAtMs: next.nextState.windowStartedAtMs + AI_RATE_LIMIT_WINDOW_MS,
+      });
     }
-    if (Buffer.byteLength(request.image.dataBase64, "utf8") > 7_000_000) {
-      throw new HttpsError("invalid-argument", "Image exceeds the allowed size.");
-    }
+    return next;
+  });
+
+  if (!decision.allowed) {
+    throw new HttpsError("resource-exhausted", "Too many AI requests. Please try again shortly.");
   }
-  return {
-    prompt: request.prompt,
-    systemInstruction: request.systemInstruction,
-    responseMimeType: request.responseMimeType === "application/json" ? "application/json" : "text/plain",
-  };
 }
 
 /** User-initiated Gemini proxy. Request content and model output are never logged. */
 export const generateAIContent = onCall(
   { secrets: [geminiApiKey], enforceAppCheck: true, timeoutSeconds: 60, memory: "512MiB" },
   async (request) => {
-    requireAuthenticatedRequest(request.auth);
-    const input = parseAIRequest(request.data);
-    const client = new GoogleGenerativeAI(geminiApiKey.value());
-    const model = client.getGenerativeModel({
-      model: process.env.GEMINI_MODEL ?? "gemini-2.0-flash",
-      systemInstruction: input.systemInstruction,
-      generationConfig: { responseMimeType: input.responseMimeType },
-    });
+    let userId: string;
+    let input: ReturnType<typeof parseAIRequest>;
     try {
+      userId = requireAuthenticatedUser(request.auth).uid;
+      input = parseAIRequest(request.data);
+    } catch (error) {
+      return mapRequestError(error);
+    }
+
+    try {
+      await takeAIRequestRateLimitSlot(userId);
+      const client = new GoogleGenerativeAI(geminiApiKey.value());
+      const model = client.getGenerativeModel({
+        model: process.env.GEMINI_MODEL ?? "gemini-2.0-flash",
+        systemInstruction: input.systemInstruction,
+        generationConfig: { responseMimeType: input.responseMimeType },
+      });
       const content = input.image
         ? [{ text: input.prompt }, { inlineData: { mimeType: input.image.mimeType, data: input.image.dataBase64 } }]
         : input.prompt;
       const result = await model.generateContent(content);
-      return { text: result.response.text() };
-    } catch {
-      throw new HttpsError("unavailable", "AI processing is temporarily unavailable.");
+      const text = result.response.text();
+      ensureAIResponseWithinLimit(text);
+      if (input.responseMimeType === "application/json") {
+        parseAIExtractionOutput(text);
+      }
+      return { text };
+    } catch (error) {
+      return mapRequestError(error);
     }
   },
 );
@@ -81,10 +111,21 @@ export const generateAIContent = onCall(
 export const resetEncryptedContent = onCall(
   { enforceAppCheck: true, timeoutSeconds: 540, memory: "1GiB" },
   async (request) => {
-    requireAuthenticatedRequest(request.auth);
-    const userId = request.auth.uid;
-    await getFirestore().recursiveDelete(getFirestore().collection("users").doc(userId));
-    await getStorage().bucket().deleteFiles({ prefix: `users/${userId}/` });
-    return { reset: true };
+    let userId: string;
+    try {
+      userId = requireAuthenticatedUser(request.auth).uid;
+    } catch (error) {
+      return mapRequestError(error);
+    }
+
+    try {
+      const db = getFirestore();
+      await db.recursiveDelete(db.collection("users").doc(userId));
+      await getStorage().bucket().deleteFiles({ prefix: `users/${userId}/` });
+      return { reset: true };
+    } catch {
+      // Do not include account, storage, or content details in an API error.
+      throw new HttpsError("unavailable", "Content reset is temporarily unavailable.");
+    }
   },
 );

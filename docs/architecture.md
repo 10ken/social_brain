@@ -1,50 +1,48 @@
-# Social Memory Architectures
+# Social Brain architecture
 
-This document outlines the System Architecture for **Social Memory** (aka **Social Brain**), a private intelligence assistant for your social life.
+Social Brain is a local-first private memory assistant for people, events,
+follow-ups, and reviewed captures.
 
-## 1. High-Level Architectural Pattern
-The application follows modern Android **MVVM (Model-View-ViewModel)** architecture and Clean Architecture principles:
+## Client architecture
+
+Android uses Jetpack Compose with an MVVM-style `AppViewModel` and Room.
+iOS uses SwiftUI, SwiftData, and focused local services. Each client owns its
+local source of truth; neither reads another device's private record store.
 
 ```
-┌────────────────────────────────────────────────────────┐
-│                        VIEW LAYER                      │
-│      Jetpack Compose UI (MainAppContainer / Screens)   │
-└───────────────────────────┬────────────────────────────┘
-                            │ (Observes UI States)
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│                     VIEWMODEL LAYER                    │
-│      AppViewModel (StateFlows / Screen Navigation)     │
-└───────────────────────────┬────────────────────────────┘
-                            │ (Dispatches Write & Queries)
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│                    REPOSITORY LAYER                    │
-│      AppRepository (Facade to DAO & Gemini APIs)       │
-└─────────────┬───────────────────────────────┬──────────┘
-              │                               │
-              ▼                               ▼
-┌───────────────────────────┐   ┌────────────────────────┐
-│     PERSISTENCE (LOCAL)   │   │     REMOTE AI CLIENT   │
-│      SQLite / Room DB     │   │      GeminiClient      │
-└───────────────────────────┘   └────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│ Android: Jetpack Compose · iOS: SwiftUI                  │
+└───────────────────────────┬──────────────────────────────┘
+                            │
+┌───────────────────────────▼──────────────────────────────┐
+│ View state, capture review, calendar and permission flows │
+└───────────────┬─────────────────────────────┬────────────┘
+                │                             │
+┌───────────────▼──────────────┐  ┌───────────▼───────────┐
+│ Local store and device key   │  │ Authenticated AI proxy │
+│ Room / SwiftData / encrypted │  │ Firebase Auth +        │
+│ attachments                  │  │ App Check + Functions  │
+└──────────────────────────────┘  └───────────────────────┘
 ```
 
-### Components
-1. **View Layer (Jetpack Compose)**: Built entirely upon Jetpack Compose, implementing responsive, adaptive layouts, and adhering strictly to Material Design 3 (M3). It showcases custom interactive components such as:
-   - **Chronological Social Calendar Heatmap**: Computes start-to-end alignments for any given month, rendering custom calendar grids with dynamic alpha-shaded Teal density grids tracking daily totals:
-     * *0 items*: Neutral background.
-     * *1 item*: Subtle Teal tint (15% opacity).
-     * *2 items*: Medium Teal tint (35% opacity).
-     * *3 items*: Dark Teal tint (60% opacity) with white text.
-     * *4+ items*: Solid primary Teal highlight with white text.
-   - **Dynamic Month Picker**: An custom dialog showing the full 12-month layout and year controls for instant calendar travel.
-   - **Interactive Callback Checklist**: Unified inside the same view to display events and due-dated tasks with fast-toggle checkbox state controls.
-2. **ViewModel (AppViewModel)**: Ingests hot database Flows from the repository, exposes immutable `StateFlow` structures, maintains screen navigation stack states, and coordinates asynchronous background extractions.
-3. **Repository (AppRepository)**: Unifies local database queries and AI endpoints into a solid transaction boundary.
-4. **Data Sources**:
-   - **Local Database (Room/SQLite)**: The source-of-truth for all user records, relationships, events, memories, and task checklists.
-   - **Gemini Rest Client**: Formulates raw speech transcripts, pasted text chunks, or screenshot logs into structured JSON payloads.
+Local records include people, groups, memberships, relationships, events,
+captures, memories, and reminders. On iOS, attachment bytes are encrypted with
+a device-bound key before being stored in the application-support directory.
+Every AI-derived item stays pending until the user explicitly reviews it.
 
-## 2. API Service Integration
-To bypass massive framework sizes, the integration is accomplished via a custom REST-compliant JSON client targeting Gemini `v1beta` models directly. It uses specialized extraction prompts to parse unstructured text blocks into structured data types safely without leaking security scopes.
+## Cloud boundary
+
+The Firebase callable endpoint is the only supported cloud boundary for AI
+requests. It requires a signed-in Firebase user and App Check, owns the Gemini
+credential, accepts bounded text plus an optional image, and does not persist
+prompt or response content. The canonical structured extraction result is
+defined by `shared/contracts/v1/ai-extraction.schema.json` and uses camelCase
+JSON fields.
+
+## Sync status
+
+Cross-device content synchronization is intentionally disabled. Current local
+encryption keys are device specific, so Firestore envelope code is retained only
+as an isolated, future transport component. The user interface does not upload,
+download, or claim to synchronize personal records until a portable key-recovery
+design has been approved and independently reviewed.

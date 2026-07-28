@@ -1,0 +1,47 @@
+{
+  "people": [
+    {
+      "name": "Michelle",
+      "confidenceState": "suggested",
+      "evidence": "Michelle's birthday dinner is next Saturday."
+    }
+  ],
+  "events": [
+    {
+      "title": "Michelle's birthday dinner",
+      "dateText": "next Saturday",
+      "resolvedDate": "2026-06-13",
+      "timeText": "7pm",
+      "location": "Bar Isabel",
+      "people": ["Michelle", "Alex"],
+      "confidenceState": "needs_review",
+      "evidence": "Michelle's birthday dinner is next Saturday at 7pm at Bar Isabel."
+    }
+  ],
+  "memories": [
+    {
+      "person": "Sarah",
+      "content": "Sarah is moving and cannot attend the dinner.",
+      "memoryType": "life_update",
+      "confidenceState": "suggested",
+      "evidence": "Sarah can't make it because she is moving."
+    }
+  ],
+  "relationships": [
+    {
+      "personA": "Alex",
+      "personB": "Michelle",
+      "relationshipType": "friend",
+      "confidenceState": "needs_review",
+      "evidence": "Alex and Michelle were both listed as attendees."
+    }
+  ],
+  "reminders": [
+    {
+      "title": "Ask Sarah about her move",
+      "dueText": "next week",
+      "confidenceState": "suggested",
+      "evidence": "Sarah is moving."
+    }
+  ]
+}

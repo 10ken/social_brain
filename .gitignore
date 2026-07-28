@@ -10,16 +10,19 @@ app/google-services.json
 .firebaserc
 firebase-debug.log
 firebase-debug.*.log
-functions/.env
-functions/lib/
-functions/node_modules/
+firebase/functions/.env
+firebase/functions/lib/
+firebase/functions/node_modules/
 
 # Apple/Xcode
 ios/.build/
 ios/DerivedData/
+ios/.swiftpm/
 ios/**/*.xcuserstate
 ios/**/*.xcuserdata/
+ios/**/*.xcodeproj/
 ios/GoogleService-Info.plist
+ios/SocialBrain/Resources/GoogleService-Info.plist
 
 # Operating-system files
 .DS_Store

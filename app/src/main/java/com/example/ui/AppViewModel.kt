@@ -5,8 +5,11 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.api.AiAccessException
+import com.example.api.AiAccessState
 import com.example.api.ExtractionResult
 import com.example.api.GeminiClient
+import com.example.api.SecureAiGateway
 import com.example.data.*
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -78,6 +81,20 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     // Extraction processing state
     private val _isExtracting = MutableStateFlow(false)
     val isExtracting: StateFlow<Boolean> = _isExtracting.asStateFlow()
+
+    private val _aiAccessState = MutableStateFlow(SecureAiGateway.currentAccessState())
+    val aiAccessState: StateFlow<AiAccessState> = _aiAccessState.asStateFlow()
+
+    fun refreshAiAccessState() {
+        _aiAccessState.value = SecureAiGateway.currentAccessState()
+    }
+
+    private fun recordAiFailure(error: Throwable) {
+        _aiAccessState.value = (error as? AiAccessException)?.state
+            ?: SecureAiGateway.currentAccessState().let { state ->
+                if (state == AiAccessState.READY) AiAccessState.SERVICE_UNAVAILABLE else state
+            }
+    }
 
     init {
         val database = AppDatabase.getDatabase(application)
@@ -400,13 +417,18 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             question
         }
 
-        val rawResponse = GeminiClient.askQuestion(
-            question = fullQuestion,
-            existingPeople = allPeople.value,
-            existingGroups = allGroups.value,
-            existingEvents = allEvents.value,
-            existingMemories = allMemories.value
-        )
+        val rawResponse = try {
+            GeminiClient.askQuestion(
+                question = fullQuestion,
+                existingPeople = allPeople.value,
+                existingGroups = allGroups.value,
+                existingEvents = allEvents.value,
+                existingMemories = allMemories.value
+            )
+        } catch (error: Exception) {
+            recordAiFailure(error)
+            _aiAccessState.value.userMessage
+        }
         
         var isDrift = false
         var cleanResponse = rawResponse
@@ -669,7 +691,18 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 // Trigger Gemini Extraction
                 val currentPeople = repository.allPeople.first()
                 val currentGroups = repository.allGroups.first()
-                val result = GeminiClient.extractFromCapture(textNote, screenshot, currentPeople, currentGroups)
+                val result = try {
+                    GeminiClient.extractFromCapture(textNote, screenshot, currentPeople, currentGroups)
+                } catch (error: Exception) {
+                    recordAiFailure(error)
+                    ExtractionResult(
+                        people = emptyList(),
+                        events = emptyList(),
+                        memories = emptyList(),
+                        relationships = emptyList(),
+                        reminders = emptyList()
+                    )
+                }
 
                 // Save parsed JSON in capture cache
                 val adapter = moshi.adapter(ExtractionResult::class.java)
@@ -760,16 +793,16 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
                 // Process relationships
                 finalResult.relationships.forEach { rel ->
-                    val idA = peopleMap[rel.person_a] ?: allPeople.value.find { it.fullName.lowercase() == rel.person_a.lowercase() }?.id
-                    val idB = peopleMap[rel.person_b] ?: allPeople.value.find { it.fullName.lowercase() == rel.person_b.lowercase() }?.id
+                    val idA = peopleMap[rel.personA] ?: allPeople.value.find { it.fullName.lowercase() == rel.personA.lowercase() }?.id
+                    val idB = peopleMap[rel.personB] ?: allPeople.value.find { it.fullName.lowercase() == rel.personB.lowercase() }?.id
                     
                     if (idA != null && idB != null) {
                         repository.insertRelationship(
                             Relationship(
                                 personAId = idA,
                                 personBId = idB,
-                                relationshipType = rel.relationship_type,
-                                confidenceState = rel.confidence_state,
+                                relationshipType = rel.relationshipType,
+                                confidenceState = rel.confidenceState,
                                 notes = "Evidence: ${rel.evidence ?: ""}",
                                 sourceId = captureId,
                                 evidenceText = rel.evidence
@@ -781,7 +814,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 // Process events
                 finalResult.events.forEach { ev ->
                     // Parse resolved date if existing or map to timestamp
-                    val resolvedTimestamp = parseDateAndTextToMillis(ev.date_text ?: ev.resolved_date, ev.time_text)
+                    val resolvedTimestamp = parseDateAndTextToMillis(ev.dateText ?: ev.resolvedDate, ev.timeText)
                     
                     // Map attendee names to IDs
                     val attendeeIds = ev.people.mapNotNull { name ->
@@ -796,8 +829,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                             groupId = _taggedGroupIdForCapture.value,
                             sourceId = captureId,
                             evidenceText = ev.evidence,
-                            dateText = ev.date_text,
-                            confidenceState = ev.confidence_state
+                            dateText = ev.dateText,
+                            confidenceState = ev.confidenceState
                         ),
                         attendeeIds = attendeeIds
                     )
@@ -816,10 +849,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                             content = mem.content,
                             personId = targetPersonId,
                             groupId = taggedGroupId,
-                            memoryType = mem.memory_type,
+                            memoryType = mem.memoryType,
                             sourceId = captureId,
                             evidenceText = mem.evidence,
-                            confidenceState = mem.confidence_state
+                            confidenceState = mem.confidenceState
                         )
                     )
                 }
@@ -842,7 +875,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                             personId = linkPersonId,
                             sourceId = captureId,
                             evidenceText = rem.evidence,
-                            confidenceState = rem.confidence_state
+                            confidenceState = rem.confidenceState
                         )
                     )
                 }

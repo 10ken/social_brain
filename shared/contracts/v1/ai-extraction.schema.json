@@ -2,26 +2,99 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://socialbrain.app/contracts/v1/ai-extraction.schema.json",
   "title": "Social Brain AI extraction result",
+  "description": "Canonical JSON returned by the authenticated AI extraction endpoint. All property names use camelCase.",
   "type": "object",
   "additionalProperties": false,
   "required": ["people", "events", "memories", "relationships", "reminders"],
   "properties": {
-    "people": { "$ref": "#/$defs/suggestions" },
-    "events": { "$ref": "#/$defs/suggestions" },
-    "memories": { "$ref": "#/$defs/suggestions" },
-    "relationships": { "$ref": "#/$defs/suggestions" },
-    "reminders": { "$ref": "#/$defs/suggestions" }
+    "people": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/person" } },
+    "events": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/event" } },
+    "memories": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/memory" } },
+    "relationships": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/relationship" } },
+    "reminders": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/reminder" } }
   },
   "$defs": {
-    "suggestions": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["confidenceState", "evidence"],
-        "properties": {
-          "confidenceState": { "enum": ["suggested", "needs_review"] },
-          "evidence": { "type": "string", "minLength": 1 }
-        }
+    "confidenceState": {
+      "type": "string",
+      "enum": ["suggested", "needs_review"]
+    },
+    "evidence": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "optionalText": {
+      "type": ["string", "null"],
+      "maxLength": 2000
+    },
+    "person": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "confidenceState", "evidence"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "confidenceState": { "$ref": "#/$defs/confidenceState" },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "confidenceState", "evidence"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "dateText": { "$ref": "#/$defs/optionalText" },
+        "resolvedDate": { "type": ["string", "null"], "format": "date" },
+        "timeText": { "$ref": "#/$defs/optionalText" },
+        "location": { "$ref": "#/$defs/optionalText" },
+        "people": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "maxLength": 300 },
+          "maxItems": 100
+        },
+        "confidenceState": { "$ref": "#/$defs/confidenceState" },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "memory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["content", "memoryType", "confidenceState", "evidence"],
+      "properties": {
+        "person": { "$ref": "#/$defs/optionalText" },
+        "content": { "type": "string", "minLength": 1, "maxLength": 10000 },
+        "memoryType": {
+          "type": "string",
+          "enum": ["life_update", "preference", "relationship", "event_context", "follow_up", "general_note"]
+        },
+        "confidenceState": { "$ref": "#/$defs/confidenceState" },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "relationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["personA", "personB", "relationshipType", "confidenceState", "evidence"],
+      "properties": {
+        "personA": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "personB": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "relationshipType": {
+          "type": "string",
+          "enum": ["spouse", "sibling", "coworker", "friend", "met_through"]
+        },
+        "confidenceState": { "$ref": "#/$defs/confidenceState" },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "reminder": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "confidenceState", "evidence"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "dueText": { "$ref": "#/$defs/optionalText" },
+        "confidenceState": { "$ref": "#/$defs/confidenceState" },
+        "evidence": { "$ref": "#/$defs/evidence" }
       }
     }
   }

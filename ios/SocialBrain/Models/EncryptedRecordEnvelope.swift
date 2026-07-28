@@ -13,7 +13,7 @@ struct HybridRevision: Codable, Comparable, Hashable {
     var encoded: String { "\(counter):\(deviceID.uuidString.lowercased())" }
 }
 
-struct EncryptedRecordEnvelope: Codable, Identifiable {
+struct EncryptedRecordEnvelope: Codable, Identifiable, Equatable {
     let id: UUID
     let recordType: RecordType
     let schemaVersion: Int

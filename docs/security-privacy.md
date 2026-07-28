@@ -10,14 +10,26 @@ Social Memory is positioned strictly as a **Private Memory Assistant for your so
 
 ## 2. Security Safeguards
 
-### A. Local-First Database and Encrypted Sync
-Each client keeps a local source of truth (Room on Android and SwiftData on iOS). When a user enables multi-device sync, personal content is sent to Firebase only inside encrypted record envelopes. Routing metadata is retained solely to synchronize records and enforce ownership rules.
+### A. Local-First Database and Device Encryption
+Each client keeps a local source of truth (Room on Android and SwiftData on iOS).
+On iOS, imported capture bodies, attachments, and AI-analysis payloads are held
+in authenticated encrypted files using a device-specific local key; SwiftData
+keeps opaque references to those files. The current release does not offer
+cross-device content synchronization. This is intentional: without a portable,
+independently reviewed key-recovery design, a cloud transport could create a
+false expectation that encrypted records can be read on another device. The
+**Start Clean** action deletes local records, attachments, and local key material
+so a person can safely begin again.
 
 ### B. Guarded AI Boundaries
 *   **Proxy Pattern**: User prompts bypass direct decompilation risks. The Gemini key is held by an App-Check-protected Firebase Function and is never embedded in either mobile app.
 *   **Limited Scope**: All Gemini prompts are localized. User-identifiable details are isolated, and raw data is strictly formatted into granular structured suggestions without any retention or persistent tracking on public LLM endpoints.
 
 ### C. Zero-Leak Sandbox Contacts Integration
-*   **Explicit Import and Sync**: Contacts are parsed locally after consent. Imported details become encrypted CRM content only when the user has enabled account sync; device contact identifiers themselves never leave that device.
-*   **Opt-In Direct Consent**: Initiating a sync requires clear affirmation of the "Social Brain Privacy Promise" dialog, detailing how and where data is used before asking for runtime Android platform read permission (`READ_CONTACTS`).
+*   **Explicit Import**: Contacts are parsed locally after consent. Imported
+    details remain in the local app store; device contact identifiers never
+    leave that device.
+*   **Opt-In Direct Consent**: Importing contacts requires clear affirmation of
+    the "Social Brain Privacy Promise" dialog before the app asks for runtime
+    Android platform read permission (`READ_CONTACTS`).
 *   **Complete Local Controls**: Users can add, review, and manage imported profiles securely, with imported records marked clearly with the native "Imported" badge.

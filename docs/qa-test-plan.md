@@ -38,3 +38,17 @@ This checklist validates the test data generated for May, June, and July of 2026
 - [ ] Go to Alex's profile -> Check that "Coffee with Alex", "Paddling Season...", and "Morning Run" correctly surface in the respective Person profile under the relevant temporal associations.
 - [ ] Go to Michelle's profile -> Confirm the "Drinks at Bar Isabel" and "Brunch with Michelle" items reflect on the person timeline correctly.
 - [ ] Navigate to the Paddling Friend Circle -> Validate that the "Paddling Season Kickoff" (May 15) emerges mapped natively back to this structural grouping.
+
+## 4. iOS validation after Xcode installation
+
+- [ ] Generate the project with `xcodegen generate` from `ios/` and build the
+  `SocialBrain` scheme for an iOS 17 simulator.
+- [ ] Run the `SocialBrainTests` target, including cipher, local clean-slate,
+  envelope serialization, capture-review, and calendar-permission tests.
+- [ ] Verify every capture type remains a pending local review until explicitly
+  confirmed, then verify evidence text is visible on the created record.
+- [ ] Verify sign-out leaves AI unavailable with an actionable sign-in message.
+- [ ] Verify Calendar permission denial does not crash, and a granted calendar
+  can create, update, and remove only app-requested events.
+- [ ] Verify Start Clean requires confirmation and leaves no local records or
+  device key behind.

@@ -52,8 +52,17 @@ protocol SyncableRecord: AnyObject {
 
 @Model final class CaptureRecord: Identifiable, SyncableRecord {
     @Attribute(.unique) var id: UUID
-    var type: String; var rawContent: String; var attachmentPath: String?; var analyzedJSON: String?; var processed: Bool; var createdAt: Date; var updatedAt: Date; var archivedAt: Date?; var deletedAt: Date?
-    init(type: String, rawContent: String) { id = UUID(); self.type = type; self.rawContent = rawContent; attachmentPath = nil; analyzedJSON = nil; processed = false; createdAt = .now; updatedAt = .now; archivedAt = nil; deletedAt = nil }
+    // `rawContent`, `attachmentPath`, and `analyzedJSON` remain only for a
+    // one-time local migration path. New captures use the encrypted-reference
+    // fields below and leave these legacy fields empty.
+    var type: String; var rawContent: String; var attachmentPath: String?; var analyzedJSON: String?
+    var encryptedContentReference: String?; var encryptedAttachmentReference: String?; var encryptedAnalysisReference: String?; var contentPreview: String?; var sourceLabel: String?
+    var processed: Bool; var createdAt: Date; var updatedAt: Date; var archivedAt: Date?; var deletedAt: Date?
+    init(type: String, rawContent: String = "") {
+        id = UUID(); self.type = type; self.rawContent = rawContent; attachmentPath = nil; analyzedJSON = nil
+        encryptedContentReference = nil; encryptedAttachmentReference = nil; encryptedAnalysisReference = nil; contentPreview = nil; sourceLabel = nil
+        processed = false; createdAt = .now; updatedAt = .now; archivedAt = nil; deletedAt = nil
+    }
 }
 
 @Model final class ReminderRecord: Identifiable, SyncableRecord {

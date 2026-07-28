@@ -70,6 +70,7 @@ dependencies {
   implementation(platform(libs.androidx.compose.bom))
   implementation(platform(libs.firebase.bom))
   implementation(libs.firebase.auth)
+  implementation(libs.firebase.appcheck.playintegrity)
   implementation(libs.firebase.firestore)
   implementation(libs.firebase.functions)
   // implementation(libs.accompanist.permissions)

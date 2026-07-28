@@ -1774,6 +1774,49 @@ fun CommunitiesScreen(viewModel: AppViewModel, modifier: Modifier) {
     }
 }
 
+@Composable
+private fun AiAccessNotice(
+    state: AiAccessState,
+    onRefresh: () -> Unit,
+    onOpenSetup: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (state.canUseAi) return
+
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = SocialMemoryColors.surface,
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, SocialMemoryColors.borderSubtle)
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = "AI FEATURES DISABLED",
+                color = SocialMemoryColors.primary,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.5.sp
+            )
+            Text(
+                text = state.userMessage,
+                color = SocialMemoryColors.textSecondary,
+                fontSize = 12.sp
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = onOpenSetup) {
+                    Text("Open account setup")
+                }
+                TextButton(onClick = onRefresh) {
+                    Text("Refresh status")
+                }
+            }
+        }
+    }
+}
+
 // ==========================================
 // NEW: ASK ME SCREEN (CHAT)
 // ==========================================
@@ -1783,6 +1826,7 @@ fun CommunitiesScreen(viewModel: AppViewModel, modifier: Modifier) {
 fun AskScreen(viewModel: AppViewModel, modifier: Modifier) {
     val chatHistory by viewModel.recallChatHistory.collectAsStateWithLifecycle()
     val people by viewModel.allPeople.collectAsStateWithLifecycle()
+    val aiAccessState by viewModel.aiAccessState.collectAsStateWithLifecycle()
     
     var question by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -1794,7 +1838,9 @@ fun AskScreen(viewModel: AppViewModel, modifier: Modifier) {
     val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
 
     val executeQuery = { queryText: String ->
-        if (chatHistory.count { it.isUser } >= 3) {
+        if (!aiAccessState.canUseAi) {
+            viewModel.refreshAiAccessState()
+        } else if (chatHistory.count { it.isUser } >= 3) {
             upgradeDialogVisible = true
         } else {
             question = "" // Clear the input UI
@@ -1842,6 +1888,14 @@ fun AskScreen(viewModel: AppViewModel, modifier: Modifier) {
                         Icon(Icons.Default.Refresh, contentDescription = "Clear Chat", tint = SocialMemoryColors.primary)
                     }
                 }
+            }
+
+            if (!aiAccessState.canUseAi) {
+                AiAccessNotice(
+                    state = aiAccessState,
+                    onRefresh = viewModel::refreshAiAccessState,
+                    onOpenSetup = { viewModel.setTab(AppScreen.Settings) }
+                )
             }
 
             if (chatHistory.isEmpty()) {
@@ -2017,7 +2071,7 @@ fun AskScreen(viewModel: AppViewModel, modifier: Modifier) {
                     modifier = Modifier
                         .size(48.dp)
                         .background(if (question.isNotBlank()) SocialMemoryColors.primary else SocialMemoryColors.surfaceRaised, CircleShape),
-                    enabled = question.isNotBlank() && !isLoading
+                    enabled = question.isNotBlank() && !isLoading && aiAccessState.canUseAi
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.Send, 
@@ -3588,6 +3642,7 @@ fun CaptureScreen(viewModel: AppViewModel, modifier: Modifier) {
     val selectedTaggedPersonIdState by viewModel.taggedPersonIdForCapture.collectAsStateWithLifecycle()
     val groupsState by viewModel.allGroups.collectAsStateWithLifecycle()
     val selectedTaggedGroupIdState by viewModel.taggedGroupIdForCapture.collectAsStateWithLifecycle()
+    val aiAccessState by viewModel.aiAccessState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
     LazyColumn(
@@ -3610,6 +3665,16 @@ fun CaptureScreen(viewModel: AppViewModel, modifier: Modifier) {
                     text = "Turn text chunks, simulated audio transcripts, or chat screenshots into structured mappings instantly.", 
                     fontSize = 14.sp, 
                     color = SocialMemoryColors.textSecondary
+                )
+            }
+        }
+
+        if (!aiAccessState.canUseAi) {
+            item {
+                AiAccessNotice(
+                    state = aiAccessState,
+                    onRefresh = viewModel::refreshAiAccessState,
+                    onOpenSetup = { viewModel.setTab(AppScreen.Settings) }
                 )
             }
         }
@@ -3815,7 +3880,7 @@ fun CaptureScreen(viewModel: AppViewModel, modifier: Modifier) {
                             ),
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
-                            enabled = notepadText.isNotBlank()
+                            enabled = notepadText.isNotBlank() && aiAccessState.canUseAi
                         ) {
                             Text("Analyze Capture Chunk", fontWeight = FontWeight.ExtraBold)
                         }
@@ -3908,7 +3973,7 @@ fun CaptureScreen(viewModel: AppViewModel, modifier: Modifier) {
                     border = BorderStroke(1.dp, SocialMemoryColors.borderSubtle),
                     modifier = Modifier
                         .weight(1f)
-                        .clickable {
+                        .clickable(enabled = aiAccessState.canUseAi) {
                             val mockText = """
                                 [WhatsApp Screenshot Chat Log]
                                 Alex: Let's do paddlers BBQ this Sunday at 2pm at Hanlan's Point!
@@ -3949,7 +4014,7 @@ fun CaptureScreen(viewModel: AppViewModel, modifier: Modifier) {
                     border = BorderStroke(1.dp, SocialMemoryColors.borderSubtle),
                     modifier = Modifier
                         .weight(1f)
-                        .clickable {
+                        .clickable(enabled = aiAccessState.canUseAi) {
                             val mockTranscript = "Record: Alex Chen and Michelle are going to Japan in September. Remember to check on Kyoto hotels next time we meet up."
                             viewModel.performCaptureAnalysis("voice", mockTranscript, null, selectedTaggedPersonIdState, selectedTaggedGroupIdState)
                         }
@@ -4275,7 +4340,7 @@ fun ReviewExtractionScreen(captureId: Int, viewModel: AppViewModel, modifier: Mo
                                 shape = RoundedCornerShape(6.dp)
                             ) {
                                 Text(
-                                    text = item.confidence_state.uppercase(), 
+                                    text = item.confidenceState.uppercase(),
                                     color = SocialMemoryColors.confirm, 
                                     fontSize = 9.sp, 
                                     fontWeight = FontWeight.Bold,
@@ -4339,7 +4404,7 @@ fun ReviewExtractionScreen(captureId: Int, viewModel: AppViewModel, modifier: Mo
                                     )
                                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(vertical = 2.dp)) {
                                         Text(
-                                            text = "Date: ${item.date_text ?: "TBD"}", 
+                                            text = "Date: ${item.dateText ?: "TBD"}",
                                             color = SocialMemoryColors.textMuted, 
                                             fontSize = 11.sp
                                         )
@@ -4349,7 +4414,7 @@ fun ReviewExtractionScreen(captureId: Int, viewModel: AppViewModel, modifier: Mo
                                             fontSize = 11.sp
                                         )
                                         Text(
-                                            text = "Time: ${item.time_text ?: "TBD"}", 
+                                            text = "Time: ${item.timeText ?: "TBD"}",
                                             color = SocialMemoryColors.textMuted, 
                                             fontSize = 11.sp
                                         )
@@ -4431,7 +4496,7 @@ fun ReviewExtractionScreen(captureId: Int, viewModel: AppViewModel, modifier: Mo
                                         shape = RoundedCornerShape(6.dp)
                                     ) {
                                         Text(
-                                            text = item.memory_type.uppercase(), 
+                                            text = item.memoryType.uppercase(),
                                             color = SocialMemoryColors.info, 
                                             fontSize = 9.sp, 
                                             fontWeight = FontWeight.Bold,
@@ -4490,7 +4555,7 @@ fun ReviewExtractionScreen(captureId: Int, viewModel: AppViewModel, modifier: Mo
                                 )
                                 Column {
                                     Text(
-                                        text = "${item.person_a} • ${item.relationship_type.replace("_", " ").uppercase()} • ${item.person_b}", 
+                                        text = "${item.personA} • ${item.relationshipType.replace("_", " ").uppercase()} • ${item.personB}",
                                         color = SocialMemoryColors.textPrimary, 
                                         fontSize = 13.sp, 
                                         fontWeight = FontWeight.Bold
@@ -4552,7 +4617,7 @@ fun ReviewExtractionScreen(captureId: Int, viewModel: AppViewModel, modifier: Mo
                                         fontSize = 13.sp, 
                                         fontWeight = FontWeight.Bold
                                     )
-                                    item.due_text?.let { 
+                                    item.dueText?.let {
                                         Text(
                                             text = "Due text: $it", 
                                             color = SocialMemoryColors.textMuted, 
