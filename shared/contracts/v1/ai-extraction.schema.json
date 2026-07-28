@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://socialbrain.app/contracts/v1/ai-extraction.schema.json",
+  "title": "Social Brain AI extraction result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["people", "events", "memories", "relationships", "reminders"],
+  "properties": {
+    "people": { "$ref": "#/$defs/suggestions" },
+    "events": { "$ref": "#/$defs/suggestions" },
+    "memories": { "$ref": "#/$defs/suggestions" },
+    "relationships": { "$ref": "#/$defs/suggestions" },
+    "reminders": { "$ref": "#/$defs/suggestions" }
+  },
+  "$defs": {
+    "suggestions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["confidenceState", "evidence"],
+        "properties": {
+          "confidenceState": { "enum": ["suggested", "needs_review"] },
+          "evidence": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

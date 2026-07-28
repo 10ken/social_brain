@@ -3,7 +3,6 @@ package com.example.api
 import android.graphics.Bitmap
 import android.util.Base64
 import android.util.Log
-import com.example. BuildConfig
 import com.example.data.Group
 import com.example.data.Person
 import com.example.data.SocialEvent
@@ -11,58 +10,7 @@ import com.example.data.Memory
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.RequestBody.Companion.toRequestBody
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.POST
-import retrofit2.http.Query
 import java.io.ByteArrayOutputStream
-import java.util.concurrent.TimeUnit
-
-// --- API Request/Response Structures for Gemini ---
-
-@JsonClass(generateAdapter = true)
-data class GeminiPart(
-    val text: String? = null,
-    val inlineData: InlineData? = null
-)
-
-@JsonClass(generateAdapter = true)
-data class InlineData(
-    val mimeType: String,
-    val data: String
-)
-
-@JsonClass(generateAdapter = true)
-data class GeminiContent(
-    val parts: List<GeminiPart>
-)
-
-@JsonClass(generateAdapter = true)
-data class GenerationConfig(
-    val responseMimeType: String? = null,
-    val temperature: Float? = null
-)
-
-@JsonClass(generateAdapter = true)
-data class GeminiRequest(
-    val contents: List<GeminiContent>,
-    val generationConfig: GenerationConfig? = null,
-    val systemInstruction: GeminiContent? = null
-)
-
-@JsonClass(generateAdapter = true)
-data class GeminiResponse(
-    val candidates: List<GeminiCandidate>?
-)
-
-@JsonClass(generateAdapter = true)
-data class GeminiCandidate(
-    val content: GeminiContent?
-)
 
 // --- Extracted Unified Personal CRM Suggestion Models ---
 
@@ -107,7 +55,8 @@ data class ExtractedRelationship(
 data class ExtractedReminder(
     val title: String,
     val due_text: String? = null,
-    val confidence_state: String = "suggested"
+    val confidence_state: String = "suggested",
+    val evidence: String? = null
 )
 
 @JsonClass(generateAdapter = true)
@@ -119,38 +68,12 @@ data class ExtractionResult(
     val reminders: List<ExtractedReminder> = emptyList()
 )
 
-// --- Retrofit Interface ---
-
-interface GeminiApiService {
-    @POST("v1beta/models/gemini-3.5-flash:generateContent")
-    suspend fun generateContent(
-        @Query("key") apiKey: String,
-        @Body request: GeminiRequest
-    ): GeminiResponse
-}
-
 object GeminiClient {
     private const val TAG = "GeminiClient"
-    private const val BASE_URL = "https://generativelanguage.googleapis.com/"
 
     private val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
         .build()
-
-    private val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(60, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .writeTimeout(60, TimeUnit.SECONDS)
-        .build()
-
-    private val api: GeminiApiService by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .build()
-            .create(GeminiApiService::class.java)
-    }
 
     private fun Bitmap.toBase64(): String {
         val outputStream = ByteArrayOutputStream()
@@ -165,10 +88,6 @@ object GeminiClient {
         existingEvents: List<SocialEvent>,
         existingMemories: List<Memory>
     ): String {
-        val apiKey = BuildConfig.GEMINI_API_KEY
-        if (apiKey.isEmpty() || apiKey == "MY_GEMINI_API_KEY") {
-            return "API Key is missing. Cannot answer question."
-        }
         val peopleContext = existingPeople.joinToString("\n") { 
             "- ${it.fullName}" + (if (!it.nickname.isNullOrBlank()) " (Nickname: ${it.nickname})" else "") + (if (it.isSelf) " [NOTE: THIS IS THE USER/ME]" else "") + (if (it.location != null) " (Location: ${it.location})" else "")
         }
@@ -207,22 +126,11 @@ object GeminiClient {
             Provide a helpful, precise, and concise answer. If you don't know the answer, say so.
         """.trimIndent()
 
-        val requestBody = GeminiRequest(
-            contents = listOf(GeminiContent(parts = listOf(GeminiPart(text = prompt)))),
-            generationConfig = GenerationConfig(
-                temperature = 0.2f
-            )
-        )
-
         return try {
-            val response = api.generateContent(
-                apiKey = apiKey,
-                request = requestBody
-            )
-            response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text ?: "No answer generated."
+            SecureAiGateway.generate(prompt = prompt)
         } catch (e: Exception) {
-            Log.e(TAG, "API Error: ${e.message}", e)
-            "Error querying data: ${e.message}"
+            Log.e(TAG, "Secure AI request failed", e)
+            "AI is unavailable. Check your connection and sign-in status."
         }
     }
 
@@ -232,12 +140,6 @@ object GeminiClient {
         existingPeople: List<Person> = emptyList(),
         existingGroups: List<Group> = emptyList()
     ): ExtractionResult {
-        val apiKey = BuildConfig.GEMINI_API_KEY
-        if (apiKey.isEmpty() || apiKey == "MY_GEMINI_API_KEY") {
-            Log.e(TAG, "API Key is empty or placeholder! Running fallback parser...")
-            return generateFallback(textNote ?: "Screenshot Capture")
-        }
-
         val peopleContext = existingPeople.joinToString("\n") { 
             "- ${it.fullName}" + (if (!it.nickname.isNullOrBlank()) " (Nickname: ${it.nickname})" else "") + (if (it.isSelf) " [NOTE: THIS IS THE USER/ME]" else "")
         }
@@ -297,7 +199,8 @@ object GeminiClient {
                 {
                   "title": "Ask Sarah about her move",
                   "due_text": "next week",
-                  "confidence_state": "suggested"
+                  "confidence_state": "suggested",
+                  "evidence": "Sarah can't make it because she is moving"
                 }
               ]
             }
@@ -310,33 +213,17 @@ object GeminiClient {
             5. Make sure output is raw parseable JSON only. Do not enclose it in markdown blocks.
         """.trimIndent()
 
-        val parts = mutableListOf<GeminiPart>()
-        parts.add(GeminiPart(text = prompt))
-        if (screenshot != null) {
-            parts.add(GeminiPart(inlineData = InlineData(mimeType = "image/jpeg", data = screenshot.toBase64())))
-        }
-
-        val requestBody = GeminiRequest(
-            contents = listOf(GeminiContent(parts = parts)),
-            generationConfig = GenerationConfig(
-                responseMimeType = "application/json",
-                temperature = 0.2f
-            ),
-            systemInstruction = GeminiContent(parts = listOf(GeminiPart(text = "You are an expert Social Brain / Personal CRM AI extractor designed to parse social signals. Return valid JSON only.")))
-        )
-
         return try {
-            val response = api.generateContent(apiKey, requestBody)
-            val jsonText = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
-            if (jsonText != null) {
-                val adapter = moshi.adapter(ExtractionResult::class.java)
-                adapter.fromJson(jsonText) ?: generateFallback(textNote ?: "Screenshot Capture")
-            } else {
-                Log.e(TAG, "No response candidate found.")
-                generateFallback(textNote ?: "Screenshot Capture")
-            }
+            val jsonText = SecureAiGateway.generate(
+                prompt = prompt,
+                systemInstruction = "You are an expert Social Brain / Personal CRM AI extractor designed to parse social signals. Return valid JSON only.",
+                responseMimeType = "application/json",
+                image = screenshot?.let { SecureAiGateway.InlineImage("image/jpeg", it.toBase64()) }
+            )
+            val adapter = moshi.adapter(ExtractionResult::class.java)
+            adapter.fromJson(jsonText) ?: generateFallback(textNote ?: "Screenshot Capture")
         } catch (e: Exception) {
-            Log.e(TAG, "Gemini API call failed", e)
+            Log.e(TAG, "Secure AI extraction failed", e)
             generateFallback(textNote ?: "Screenshot Capture")
         }
     }

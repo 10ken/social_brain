@@ -1,0 +1,25 @@
+# Android
+/build/
+/.gradle/
+**/build/
+local.properties
+.env
+app/google-services.json
+
+# Firebase
+.firebaserc
+firebase-debug.log
+firebase-debug.*.log
+functions/.env
+functions/lib/
+functions/node_modules/
+
+# Apple/Xcode
+ios/.build/
+ios/DerivedData/
+ios/**/*.xcuserstate
+ios/**/*.xcuserdata/
+ios/GoogleService-Info.plist
+
+# Operating-system files
+.DS_Store

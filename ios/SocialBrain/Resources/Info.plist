@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDisplayName</key>
+  <string>Social Brain</string>
+  <key>CFBundleIdentifier</key>
+  <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+  <key>CFBundleVersion</key>
+  <string>1</string>
+  <key>UIApplicationSupportsIndirectInputEvents</key>
+  <true/>
+  <key>NSContactsUsageDescription</key>
+  <string>Social Brain imports contacts only when you choose to add them to your private memory.</string>
+  <key>NSPhotoLibraryUsageDescription</key>
+  <string>Social Brain lets you select screenshots to review and extract information from.</string>
+  <key>NSSpeechRecognitionUsageDescription</key>
+  <string>Social Brain transcribes a voice note only when you choose to capture one.</string>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>Social Brain needs microphone access to record a voice note you explicitly start.</string>
+  <key>NSCalendarsFullAccessUsageDescription</key>
+  <string>Social Brain reads and writes only calendars and events you explicitly connect.</string>
+</dict>
+</plist>

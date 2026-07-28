@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://socialbrain.app/contracts/v1/record-envelope.schema.json",
+  "title": "Social Brain encrypted record envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "recordType", "schemaVersion", "keyVersion", "revision", "deviceId", "updatedAtMs", "nonce", "ciphertext", "deleted"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "recordType": { "type": "string", "enum": ["person", "group", "groupMembership", "relationship", "event", "eventAttendee", "memory", "capture", "reminder", "settings"] },
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "keyVersion": { "type": "integer", "minimum": 1 },
+    "revision": { "type": "string", "minLength": 3, "maxLength": 128 },
+    "deviceId": { "type": "string", "format": "uuid" },
+    "updatedAtMs": { "type": "integer", "minimum": 0 },
+    "deleted": { "type": "boolean" },
+    "deletedAtMs": { "type": ["integer", "null"], "minimum": 0 },
+    "nonce": { "type": "string", "contentEncoding": "base64", "minLength": 16, "maxLength": 64 },
+    "ciphertext": { "type": "string", "contentEncoding": "base64", "minLength": 24, "maxLength": 1048576 }
+  }
+}

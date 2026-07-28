@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function owns(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function validEnvelope(data) {
+      return data.keys().hasOnly([
+          'id', 'recordType', 'schemaVersion', 'keyVersion', 'revision',
+          'deviceId', 'updatedAtMs', 'deleted', 'deletedAtMs', 'nonce',
+          'ciphertext'
+        ]) &&
+        data.id is string &&
+        data.recordType is string &&
+        data.schemaVersion == 1 &&
+        data.keyVersion is int && data.keyVersion > 0 &&
+        data.revision is string && data.deviceId is string &&
+        data.updatedAtMs is int && data.updatedAtMs >= 0 &&
+        data.deleted is bool &&
+        data.nonce is string && data.nonce.size() <= 64 &&
+        data.ciphertext is string && data.ciphertext.size() <= 1048576;
+    }
+
+    function validUserMetadata(data) {
+      return data.keys().hasOnly(['keyEnvelope', 'keyVersion', 'createdAtMs', 'updatedAtMs']) &&
+        data.keyEnvelope is map && data.keyVersion is int && data.keyVersion > 0 &&
+        data.createdAtMs is int && data.updatedAtMs is int;
+    }
+
+    match /users/{userId} {
+      allow read: if owns(userId);
+      allow create, update: if owns(userId) && validUserMetadata(request.resource.data);
+      allow delete: if false;
+
+      match /records/{recordId} {
+        allow read: if owns(userId);
+        allow create: if owns(userId) && request.resource.data.id == recordId &&
+          validEnvelope(request.resource.data);
+        allow update: if owns(userId) && request.resource.data.id == recordId &&
+          validEnvelope(request.resource.data);
+        allow delete: if false;
+      }
+    }
+  }
+}

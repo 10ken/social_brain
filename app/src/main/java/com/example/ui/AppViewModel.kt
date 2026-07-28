@@ -747,7 +747,12 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                         peopleMap[extPerson.name] = existing.id
                     } else {
                         val newId = repository.insertPerson(
-                            Person(fullName = extPerson.name, notes = "Extracted: ${extPerson.evidence ?: ""}")
+                            Person(
+                                fullName = extPerson.name,
+                                notes = "Extracted: ${extPerson.evidence ?: ""}",
+                                sourceId = captureId,
+                                evidenceText = extPerson.evidence
+                            )
                         ).toInt()
                         peopleMap[extPerson.name] = newId
                     }
@@ -765,7 +770,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                                 personBId = idB,
                                 relationshipType = rel.relationship_type,
                                 confidenceState = rel.confidence_state,
-                                notes = "Evidence: ${rel.evidence ?: ""}"
+                                notes = "Evidence: ${rel.evidence ?: ""}",
+                                sourceId = captureId,
+                                evidenceText = rel.evidence
                             )
                         )
                     }
@@ -788,6 +795,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                             location = ev.location,
                             groupId = _taggedGroupIdForCapture.value,
                             sourceId = captureId,
+                            evidenceText = ev.evidence,
+                            dateText = ev.date_text,
                             confidenceState = ev.confidence_state
                         ),
                         attendeeIds = attendeeIds
@@ -809,6 +818,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                             groupId = taggedGroupId,
                             memoryType = mem.memory_type,
                             sourceId = captureId,
+                            evidenceText = mem.evidence,
                             confidenceState = mem.confidence_state
                         )
                     )
@@ -829,7 +839,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                     repository.insertReminder(
                         Reminder(
                             title = rem.title,
-                            personId = linkPersonId
+                            personId = linkPersonId,
+                            sourceId = captureId,
+                            evidenceText = rem.evidence,
+                            confidenceState = rem.confidence_state
                         )
                     )
                 }
