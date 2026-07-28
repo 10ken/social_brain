@@ -1,0 +1,38 @@
+35:import com.example.ui.AppScreen
+59:            if (currentScreen != AppScreen.Home) {
+93:                        if (currentScreen != AppScreen.Home) {
+94:                            IconButton(onClick = { viewModel.setTab(AppScreen.Home) }) {
+138:                        is AppScreen.Home -> HomeScreen(viewModel, adaptiveModifier)
+139:                        is AppScreen.People -> PeopleScreen(viewModel, adaptiveModifier)
+140:                        is AppScreen.Groups -> GroupsScreen(viewModel, adaptiveModifier)
+141:                        is AppScreen.Calendar -> CalendarScreen(viewModel, adaptiveModifier)
+142:                        is AppScreen.Capture -> CaptureScreen(viewModel, adaptiveModifier)
+143:                        is AppScreen.PersonDetail -> PersonDetailScreen(screen.personId, viewModel, adaptiveModifier)
+144:                        is AppScreen.GroupDetail -> GroupDetailScreen(screen.groupId, viewModel, adaptiveModifier)
+145:                        is AppScreen.ReviewExtraction -> ReviewExtractionScreen(screen.captureId, viewModel, adaptiveModifier)
+146:                        is AppScreen.AddPerson -> AddPersonScreen(viewModel, adaptiveModifier)
+147:                        is AppScreen.AddGroup -> AddGroupScreen(viewModel, adaptiveModifier)
+148:                        is AppScreen.AddEvent -> AddEventScreen(viewModel, adaptiveModifier)
+201:    currentScreen: AppScreen,
+202:    onTabSelected: (AppScreen) -> Unit
+210:            Triple(AppScreen.Home, Icons.Default.Home, "Home"),
+211:            Triple(AppScreen.People, Icons.Default.People, "People"),
+212:            Triple(AppScreen.Capture, Icons.Default.Add, "Capture"),
+213:            Triple(AppScreen.Groups, Icons.Default.Group, "Groups"),
+214:            Triple(AppScreen.Calendar, Icons.Default.Event, "Calendar")
+219:                AppScreen.Capture -> currentScreen is AppScreen.Capture || currentScreen is AppScreen.ReviewExtraction
+220:                AppScreen.Home -> currentScreen is AppScreen.Home
+221:                AppScreen.People -> currentScreen is AppScreen.People || currentScreen is AppScreen.PersonDetail || currentScreen == AppScreen.AddPerson
+222:                AppScreen.Groups -> currentScreen is AppScreen.Groups || currentScreen is AppScreen.GroupDetail || currentScreen == AppScreen.AddGroup
+223:                AppScreen.Calendar -> currentScreen is AppScreen.Calendar || currentScreen == AppScreen.AddEvent
+231:                    if (tabScreen == AppScreen.Capture) {
+267:                    indicatorColor = if (tabScreen == AppScreen.Capture) Color.Transparent else Slate850
+1132:                    onReviewClick = { viewModel.setTab(AppScreen.Capture) },
+1142:                onViewFullCalendarClick = { viewModel.setTab(AppScreen.Calendar) }
+1600:                onClick = { viewModel.navigateTo(AppScreen.AddPerson) },
+1670:                                .clickable { viewModel.navigateTo(AppScreen.PersonDetail(person.id)) }
+1738:                onClick = { viewModel.navigateTo(AppScreen.AddGroup) },
+1777:                                .clickable { viewModel.navigateTo(AppScreen.GroupDetail(group.id)) }
+1972:                onClick = { viewModel.navigateTo(AppScreen.AddEvent) },
+2825:                            IconButton(onClick = { viewModel.navigateTo(AppScreen.ReviewExtraction(capture.id)) }) {
+3780:                            .clickable { viewModel.navigateTo(AppScreen.PersonDetail(member.id)) }

@@ -1,0 +1,354 @@
+                        colors = CardDefaults.cardColors(containerColor = Slate800),
+                            CircularProgressIndicator(color = Teal500)
+                                color = Slate50
+                                color = Slate400,
+                    color = Slate50,
+                        color = Slate400,
+                            containerColor = if (selectedGroupId == null) Teal500.copy(alpha = 0.15f) else Slate800
+                            color = if (selectedGroupId == null) Teal500 else Color.Transparent
+                                tint = if (selectedGroupId == null) Teal500 else Slate400,
+                                color = if (selectedGroupId == null) Teal500 else Slate50,
+                                containerColor = if (isSelected) Teal500.copy(alpha = 0.15f) else Slate800
+                                color = if (isSelected) Teal500 else Color.Transparent
+                                    tint = if (isSelected) Teal500 else Slate400,
+                                        color = if (isSelected) Teal500 else Slate50,
+                                            color = Slate400,
+                    Text("Close", color = Teal500)
+            containerColor = Slate900,
+                        color = Slate50,
+                        color = Teal500,
+                            colors = CardDefaults.cardColors(containerColor = Slate800),
+                                        .background(Teal500.copy(alpha = 0.15f), CircleShape),
+                                        color = Teal500,
+                                    color = Slate300,
+                    Text("WHAT DID THEY SAY?", color = Slate400, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                color = Slate400,
+                        textStyle = TextStyle(fontSize = 13.sp, color = Slate50),
+                            focusedBorderColor = Teal500,
+                            unfocusedBorderColor = Slate700
+                    Text("LINK TO UPDATE AN EVENT (OPTIONAL)", color = Slate400, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            .background(Slate800, RoundedCornerShape(8.dp))
+                            .border(1.dp, Slate700, RoundedCornerShape(8.dp))
+                                color = if (selectedEvent != null) Slate50 else Slate400,
+                                tint = Slate400,
+                            colors = CardDefaults.cardColors(containerColor = Slate800),
+                            border = BorderStroke(1.dp, Slate700),
+                                    Text("None (Do not link event)", color = Teal500, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                        Text(ev.title, color = Slate50, fontSize = 12.sp)
+                        Text("UPDATE EVENT LOCATION", color = Slate400, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            placeholder = { Text("E.g. Bar Isabel, Hanlan's Point Beach", color = Slate400, fontSize = 12.sp) },
+                            textStyle = TextStyle(fontSize = 13.sp, color = Slate50),
+                                focusedBorderColor = Teal500,
+                                unfocusedBorderColor = Slate700
+                    colors = ButtonDefaults.buttonColors(containerColor = Teal500, contentColor = Slate900),
+                    Text("Cancel", color = Slate400)
+            containerColor = Slate900,
+                    colors = ButtonDefaults.buttonColors(containerColor = Teal500),
+                    Text("I Agree, Import Contacts", fontWeight = FontWeight.Bold, color = Slate900)
+                    Text("Reject / Go Back", color = Slate400)
+                    tint = Teal500,
+                    color = Slate50,
+                        color = Slate300,
+                        colors = CardDefaults.cardColors(containerColor = Slate800),
+                            Text("🔒 100% Offline Promise", color = Teal500, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                color = Slate400,
+                        color = Slate400,
+            containerColor = Slate900,
+                containerColor = Teal500,
+                contentColor = Slate900
+        containerColor = Slate900,
+                Text("People Index", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Slate50)
+                    colors = ButtonDefaults.buttonColors(containerColor = Teal500.copy(alpha = 0.15f), contentColor = Teal500),
+                    border = BorderStroke(1.dp, Teal500),
+                    Icon(Icons.Default.Contacts, contentDescription = "Sync", modifier = Modifier.size(14.dp), tint = Teal500)
+                placeholder = { Text("Search friends, locations, nicknames...", color = Slate400) },
+                leadingIcon = { Icon(Icons.Default.Search, "Search", tint = Slate400) },
+                    focusedBorderColor = Teal500,
+                    unfocusedBorderColor = Slate700,
+                    focusedLabelColor = Teal500,
+                    unfocusedLabelColor = Slate400
+                        Icon(Icons.Default.PeopleOutline, "Empty", tint = Slate400, modifier = Modifier.size(48.dp))
+                        Text("No friends or connections found here.", color = Slate400, fontSize = 14.sp)
+                            colors = CardDefaults.cardColors(containerColor = Slate800),
+                                                Brush.linearGradient(listOf(Teal500, Sky500)),
+                                            color = Slate900,
+                                            Text(person.fullName, color = Slate50, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                                Text("(${person.nickname})", color = Slate400, fontSize = 12.sp)
+                                            Text(person.location, color = Slate400, fontSize = 12.sp)
+                                Icon(Icons.Default.KeyboardArrowRight, "View Details", tint = Slate400)
+                containerColor = Teal500,
+                contentColor = Slate900
+        containerColor = Slate900,
+            Text("Friend Circles", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Slate50)
+            Text("Host collective memory buffers, recurring groups, and communities.", fontSize = 14.sp, color = Slate400)
+                        Icon(Icons.Default.GroupWork, "Empty", tint = Slate400, modifier = Modifier.size(48.dp))
+                        Text("No circles built yet.", color = Slate400, fontSize = 14.sp)
+                            colors = CardDefaults.cardColors(containerColor = Slate800),
+                                                .background(Sky500.copy(alpha = 0.15f), CircleShape)
+                                            Icon(Icons.Default.Group, "Group Icon", tint = Sky500, modifier = Modifier.size(20.dp))
+                                            Text(group.groupName, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Slate50)
+                                            Text("${membersState.value.size} members connected", fontSize = 12.sp, color = Slate400)
+                                    Icon(Icons.Default.KeyboardArrowRight, "View Profile", tint = Slate400)
+                                    Text(group.description, fontSize = 13.sp, color = Slate400)
+                                                    .background(Slate700, RoundedCornerShape(4.dp))
+                                                Text(person.fullName, fontSize = 10.sp, color = Slate50, fontWeight = FontWeight.Bold)
+                                            Text("+${membersState.value.size - 4} more", fontSize = 11.sp, color = Slate400, modifier = Modifier.align(Alignment.CenterVertically))
+                containerColor = Teal500,
+                contentColor = Slate900
+        containerColor = Slate900,
+                    Text("Social Calendar", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Slate50)
+                    Text("Coordinating dinners, milestones, circles, and checklists offline.", fontSize = 14.sp, color = Slate400)
+                    colors = CardDefaults.cardColors(containerColor = Slate800),
+                    border = BorderStroke(1.dp, Slate700),
+                            Icon(Icons.Default.ChevronLeft, contentDescription = "Previous Month", tint = Teal500)
+                                color = Slate50
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = "Choose Date", tint = Slate400, modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.ChevronRight, contentDescription = "Next Month", tint = Teal500)
+                            color = Slate400,
+                            color = Slate50
+                            color = Slate400
+                                Icon(Icons.Default.Clear, contentDescription = "Clear", modifier = Modifier.size(16.dp), tint = Teal500)
+                                Text("Show Month", color = Teal500, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                tint = Slate400,
+                                color = Slate400,
+                        color = Teal500,
+                        colors = CardDefaults.cardColors(containerColor = Slate800),
+                        border = BorderStroke(1.dp, Slate700),
+                                    Text(event.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Slate50)
+                                    Text(dateStr, color = Teal500, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                            .background(Amber500.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+                                        Text("SUGGESTED", color = Amber500, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                                    Icon(Icons.Default.Place, "Location", tint = Slate400, modifier = Modifier.size(13.dp))
+                                    Text(event.location, color = Slate400, fontSize = 12.sp)
+                                Divider(color = Slate700, modifier = Modifier.padding(vertical = 4.dp))
+                                Text("ATTENDEES:", color = Slate400, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                                                .background(Teal500.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+                                            Text(person.fullName, fontSize = 11.sp, color = Teal500, fontWeight = FontWeight.Bold)
+                        color = Teal500,
+                            containerColor = if (reminder.completed) PolishActiveState.copy(alpha = 0.2f) else Slate800
+                        border = BorderStroke(1.dp, Slate700),
+                                    color = if (reminder.completed) Slate400 else Slate50,
+                                            color = Slate400,
+                                            color = Teal500,
+                                    tint = Slate400,
+                    color = Slate50,
+                        color = Slate400,
+                            Icon(Icons.Default.ChevronLeft, contentDescription = "Previous Year", tint = Teal500)
+                            color = Slate50
+                            Icon(Icons.Default.ChevronRight, contentDescription = "Next Year", tint = Teal500)
+                    Divider(color = Slate700)
+                                                if (isSelectedMonth) Teal500 else Slate800,
+                                                    if (isSelectedMonth) Teal500 else Slate700
+                                            color = if (isSelectedMonth) Color.White else Slate50,
+                    colors = ButtonDefaults.buttonColors(containerColor = Teal500, contentColor = Slate900)
+                    Text("Cancel", color = Slate400)
+            containerColor = Slate900,
+                Text("Zero Friction Capture", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Slate50)
+                Text("Turn text chunks, simulated audio transcripts, or chat screenshots into structured mappings instantly.", fontSize = 14.sp, color = Slate400)
+                colors = CardDefaults.cardColors(containerColor = Slate800),
+                        color = Teal500,
+                        placeholder = { Text("E.g. Michelle birthday dinner is next Saturday at h:7pm at Bar Isabel. Michelle and Alex and Sarah are coming. Sarah is moving so she can't make it.", color = Slate400, fontSize = 13.sp) },
+                            focusedBorderColor = Teal500,
+                            unfocusedBorderColor = Slate700
+                        color = Teal500,
+                        Text("No profiles available to tag. Go to People index or sync contacts first.", color = Slate400, fontSize = 11.sp)
+                                        if (selectedTaggedPersonIdState == null) Teal500.copy(alpha = 0.15f) else Slate700.copy(alpha = 0.5f),
+                                        BorderStroke(1.dp, if (selectedTaggedPersonIdState == null) Teal500 else Slate700),
+                                    color = if (selectedTaggedPersonIdState == null) Teal500 else Slate400,
+                                            if (isSelected) Teal500.copy(alpha = 0.15f) else Slate700.copy(alpha = 0.5f),
+                                            BorderStroke(1.dp, if (isSelected) Teal500 else Slate700),
+                                                .background(if (isSelected) Teal500 else Slate400, CircleShape)
+                                            color = if (isSelected) Teal500 else Slate300,
+                        colors = ButtonDefaults.buttonColors(containerColor = Teal500, contentColor = Slate900),
+                color = Slate400,
+                    colors = CardDefaults.cardColors(containerColor = Slate800),
+                        Icon(Icons.Default.PhotoSizeSelectActual, "Screenshot", tint = Sky500, modifier = Modifier.size(24.dp))
+                        Text("Simulate Chat Screenshot", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Slate50)
+                        Text("Upload Chat logs & let LLM parse links.", fontSize = 11.sp, color = Slate400)
+                    colors = CardDefaults.cardColors(containerColor = Slate800),
+                        Icon(Icons.Default.Mic, "Voice recorder", tint = Rose500, modifier = Modifier.size(24.dp))
+                        Text("Simulate Voice Recorder", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Slate50)
+                        Text("Speaks social feedback or callbacks.", fontSize = 11.sp, color = Slate400)
+                color = Slate400,
+                    colors = CardDefaults.cardColors(containerColor = Slate800.copy(alpha = 0.5f)),
+                        Text("No capture history available yet.", color = Slate400, fontSize = 12.sp)
+                    colors = CardDefaults.cardColors(containerColor = Slate800),
+                                "screenshot" -> Pair(Icons.Default.Image, Sky500)
+                                "voice" -> Pair(Icons.Default.Mic, Rose500)
+                                else -> Pair(Icons.Default.Notes, Teal500)
+                                    color = Slate50,
+                                    color = Slate400
+                                Icon(Icons.Default.ChevronRight, "Review Suggestions", tint = Teal500)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Slate50)
+                    Text("Review Suggestions", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Slate50)
+                    colors = ButtonDefaults.buttonColors(containerColor = Teal500, contentColor = Slate900),
+        containerColor = Slate900,
+                        colors = CardDefaults.cardColors(containerColor = Slate800)
+                            Text("SOURCE EVIDENCE CAPTURED", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Teal500)
+                            Text(it.rawContent, fontSize = 12.sp, color = Slate400, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                Text("PEOPLE EXTRACTED", color = Slate50, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                item { Text("No people parsed.", color = Slate400, fontSize = 12.sp) }
+                        colors = CardDefaults.cardColors(containerColor = Slate800)
+                                    colors = CheckboxDefaults.colors(checkedColor = Teal500)
+                                    Text(item.name, color = Slate50, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                    item.evidence?.let { Text("Evidence: $it", color = Slate400, fontSize = 11.sp) }
+                                    .background(Teal500.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+                                Text(item.confidence_state.uppercase(), color = Teal500, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                Text("EVENTS EXTRACTED", color = Slate50, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                item { Text("No events parsed.", color = Slate400, fontSize = 12.sp) }
+                        colors = CardDefaults.cardColors(containerColor = Slate800)
+                                    colors = CheckboxDefaults.colors(checkedColor = Teal500)
+                                    Text(item.title, color = Slate50, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                        Text("Date: ${item.date_text ?: "TBD"}", color = Slate400, fontSize = 11.sp)
+                                        Text("•", color = Slate400, fontSize = 11.sp)
+                                        Text("Time: ${item.time_text ?: "TBD"}", color = Slate400, fontSize = 11.sp)
+                                        Text("Attendees: " + item.people.joinToString(), fontSize = 11.sp, color = Teal500, fontWeight = FontWeight.Bold)
+                Text("MEMORIES & PREFERENCES", color = Slate50, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                item { Text("No memories parsed.", color = Slate400, fontSize = 12.sp) }
+                        colors = CardDefaults.cardColors(containerColor = Slate800)
+                                    colors = CheckboxDefaults.colors(checkedColor = Teal500)
+                                    Text(item.person ?: "General Circle Update", color = Teal500, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                    Text(item.content, color = Slate50, fontSize = 13.sp)
+                                            .background(Sky500.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+                                        Text(item.memory_type.uppercase(), color = Sky500, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                Text("RELATIONSHIPS MAP SUGGESTED", color = Slate50, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                item { Text("No relationships parsed.", color = Slate400, fontSize = 12.sp) }
+                        colors = CardDefaults.cardColors(containerColor = Slate800)
+                                    colors = CheckboxDefaults.colors(checkedColor = Teal500)
+                                    Text("${item.person_a} • ${item.relationship_type.replace("_", " ").uppercase()} • ${item.person_b}", color = Slate50, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text("REMINDERS & ACTIONS EXTRACTED", color = Slate50, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                item { Text("No reminders parsed.", color = Slate400, fontSize = 12.sp) }
+                        colors = CardDefaults.cardColors(containerColor = Slate800)
+                                    colors = CheckboxDefaults.colors(checkedColor = Teal500)
+                                    Text(item.title, color = Slate50, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                                    item.due_text?.let { Text("Due text: $it", color = Slate400, fontSize = 11.sp) }
+            Text("Person not found in Social Brain.", color = Slate400)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Slate50)
+                Text(person.fullName, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Slate50)
+                containerColor = Teal500,
+                contentColor = Slate900
+        containerColor = Slate900,
+                    colors = CardDefaults.cardColors(containerColor = Slate800),
+                                        Brush.linearGradient(listOf(Teal500, Sky500)),
+                                Text(person.fullName.take(1).uppercase(), color = Slate900, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                                Text(person.fullName, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Slate50)
+                                person.location?.let { Text(it, color = Slate400, fontSize = 13.sp) }
+                                    Text("Nickname: ${person.nickname}", fontSize = 12.sp, color = Slate400)
+                                    Text("Birthday: ${person.birthday}", fontSize = 12.sp, color = Slate400)
+                            Divider(color = Slate700, modifier = Modifier.padding(vertical = 4.dp))
+                                    Icon(Icons.Default.Phone, contentDescription = "Phone", tint = Teal500, modifier = Modifier.size(16.dp))
+                                    Text(person.phoneNumber, fontSize = 13.sp, color = Slate300)
+                                                .background(Teal500.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+                                            Text("Imported", color = Teal500, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                    Icon(Icons.Default.Email, contentDescription = "Email", tint = Teal500, modifier = Modifier.size(16.dp))
+                                    Text(person.email, fontSize = 13.sp, color = Slate300)
+                            Divider(color = Slate700, modifier = Modifier.padding(vertical = 4.dp))
+                            Text(person.notes, fontSize = 13.sp, color = Slate400)
+                Text("CONNECTED CIRCLES", color = Slate50, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                item { Text("No associated circles.", color = Slate400, fontSize = 12.sp) }
+                                    .background(Sky500.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+                                Text(group.groupName, color = Sky500, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("RECENT MEMORY CACHE", color = Slate50, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                item { Text("No memory history recorded yet. Add some note above or capture logs.", color = Slate400, fontSize = 12.sp) }
+                        colors = CardDefaults.cardColors(containerColor = Slate800)
+                            Text(memory.content, color = Slate50, fontSize = 13.sp)
+                                        .background(Teal500.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+                                    Text(memory.memoryType.uppercase(), color = Teal500, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                    color = Slate400
+                Text("REMINDER & FOLLOW-UP LOG", color = Slate50, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                item { Text("No follow-up action logs found.", color = Slate400, fontSize = 12.sp) }
+                        Text("PENDING (NOT ACTIONED)", color = Sky500, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            colors = CardDefaults.cardColors(containerColor = Slate800),
+                                    Text(rem.title, color = Slate50, fontSize = 13.sp)
+                                        tint = Slate400,
+                        Text("COMPLETED (ACTIONED LOGS)", color = Teal500, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
+                            colors = CardDefaults.cardColors(containerColor = Slate850),
+                            border = BorderStroke(1.dp, Slate800)
+                                        tint = Teal500,
+                                        Text(rem.title, color = Slate400, fontSize = 13.sp)
+                                        Text("Status: Actioned & Logged", color = Teal500, fontSize = 10.sp)
+                                        tint = Slate400,
+                title = { Text("Log New Memory for ${person.fullName}", color = Slate50, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
+                        placeholder = { Text("E.g. Traveled to Boston, likes IPA beers, etc.", color = Slate400) },
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Teal500)
+                        colors = ButtonDefaults.buttonColors(containerColor = Teal500, contentColor = Slate900)
+                        Text("Cancel", color = Slate400)
+                containerColor = Slate850
+                            color = Slate50,
+                            color = Teal500,
+                            colors = CardDefaults.cardColors(containerColor = Slate800),
+                                        .background(Teal500.copy(alpha = 0.15f), CircleShape),
+                                        color = Teal500,
+                                    color = Slate300,
+                        Text("WHAT DID THEY SAY?", color = Slate400, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                    color = Slate400,
+                            textStyle = TextStyle(fontSize = 13.sp, color = Slate50),
+                                focusedBorderColor = Teal500,
+                                unfocusedBorderColor = Slate700
+                        Text("LINK TO UPDATE AN EVENT (OPTIONAL)", color = Slate400, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                .background(Slate800, RoundedCornerShape(8.dp))
+                                .border(1.dp, Slate700, RoundedCornerShape(8.dp))
+                                    color = if (selectedEvent != null) Slate50 else Slate400,
+                                    tint = Slate400,
+                                colors = CardDefaults.cardColors(containerColor = Slate800),
+                                border = BorderStroke(1.dp, Slate700),
+                                        Text("None (Do not link event)", color = Teal500, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                            Text(ev.title, color = Slate50, fontSize = 12.sp)
+                            Text("UPDATE EVENT LOCATION", color = Slate400, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                placeholder = { Text("E.g. Bar Isabel, Hanlan's Point Beach", color = Slate400, fontSize = 12.sp) },
+                                textStyle = TextStyle(fontSize = 13.sp, color = Slate50),
+                                    focusedBorderColor = Teal500,
+                                    unfocusedBorderColor = Slate700
+                        colors = ButtonDefaults.buttonColors(containerColor = Teal500, contentColor = Slate900),
+                        Text("Cancel", color = Slate400)
+                containerColor = Slate900,
+val Slate850 = Color(0xFF151F32)
+            Text("Friend Circle not found.", color = Slate400)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Slate50)
+                Text(group.groupName, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Slate50)
+        containerColor = Slate900,
+                Card(colors = CardDefaults.cardColors(containerColor = Slate800)) {
+                        Text(group.groupName, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Slate50)
+                        group.description?.let { Text(it, color = Slate400, fontSize = 13.sp) }
+                Text("MEMBERS (${membersState.value.size})", color = Slate50, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                item { Text("No members linked to this circle.", color = Slate400, fontSize = 12.sp) }
+                        colors = CardDefaults.cardColors(containerColor = Slate800),
+                            Text(member.fullName, fontWeight = FontWeight.Bold, color = Slate50, fontSize = 14.sp)
+                            Icon(Icons.Default.ChevronRight, "View Details", tint = Slate400)
+                Text("CIRCLE UPDATES & CONTEXTS", color = Slate50, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                item { Text("No circle-specific updates yet. Log screenshot chat logs or voice transcripts linked to this group.", color = Slate400, fontSize = 12.sp) }
+                    Card(colors = CardDefaults.cardColors(containerColor = Slate800)) {
+                            Text(mem.content, color = Slate50, fontSize = 13.sp)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Slate50)
+                Text("Add Person Profile", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Slate50)
+        containerColor = Slate900,
+                label = { Text("Full Name (Required)", color = Slate400) },
+                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Teal500)
+                label = { Text("Nickname", color = Slate400) },
+                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Teal500)
+                label = { Text("Location", color = Slate400) },
+                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Teal500)
+                label = { Text("Notes", color = Slate400) },
+                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Teal500)
+                Text("Link to Friend Circle:", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Slate50)
+                                if (selectedGroupIndex == 0) Teal500 else Slate800,
+                        Text("None", color = if (selectedGroupIndex == 0) Slate900 else Slate50, fontWeight = FontWeight.Bold)
+                                    if (selectedGroupIndex == idx + 1) Teal500 else Slate800,
+                            Text(group.groupName, color = if (selectedGroupIndex == idx + 1) Slate900 else Slate50, fontWeight = FontWeight.Bold)
+                colors = ButtonDefaults.buttonColors(containerColor = Teal500, contentColor = Slate900),
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Slate50)
+                Text("Create Friend Circle", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Slate50)
+        containerColor = Slate900,
+                label = { Text("Circle Name (Required)", color = if (isDuplicate) PolishErrorBorder else Slate400) },
+                    focusedBorderColor = if (isDuplicate) PolishErrorBorder else Teal500,
+                label = { Text("Description", color = Slate400) },
+                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Teal500)
+                colors = ButtonDefaults.buttonColors(containerColor = Teal500, contentColor = Slate900),
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Slate50)
+                Text("Schedule Social Event", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Slate50)
+        containerColor = Slate900,
+                label = { Text("Event Title (Required)", color = Slate400) },
+                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Teal500)
+                label = { Text("Location", color = Slate400) },
+                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Teal500)
+                colors = ButtonDefaults.buttonColors(containerColor = Teal500, contentColor = Slate900),

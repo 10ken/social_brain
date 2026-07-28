@@ -1,0 +1,6 @@
+{
+  "name": "Social Brain",
+  "description": "A private memory assistant for your social life to capture, organize, and recall relationships, events, and memories.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
