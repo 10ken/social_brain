@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "firebase/functions/src/index.ts": {
-    "mtime": 1785270330.162893,
-    "ast_hash": "5608d22313a39987eab1e02df66effc6",
+    "mtime": 1785351167.811828,
+    "ast_hash": "74a3342b377ad7e56a07ca685728a6a4",
     "semantic_hash": ""
   },
   "firebase/functions/tsconfig.json": {
@@ -135,18 +135,18 @@
     "semantic_hash": ""
   },
   "ios/SocialBrain/App/AppContainerView.swift": {
-    "mtime": 1785269121.6510818,
-    "ast_hash": "94c91cdd7a61496fd97bd4ba42e303d6",
+    "mtime": 1785354498.5037901,
+    "ast_hash": "f1ccda9e164549a9747d5168122df3e7",
     "semantic_hash": ""
   },
   "ios/SocialBrain/App/FirebaseAppDelegate.swift": {
-    "mtime": 1785269962.035591,
-    "ast_hash": "dbaf2e9d17019beb0613c26b712c3e83",
+    "mtime": 1785351330.9200876,
+    "ast_hash": "09682747045cfa1e0f5b3b3b2d2dd229",
     "semantic_hash": ""
   },
   "ios/SocialBrain/App/SocialBrainApp.swift": {
-    "mtime": 1785266321.7929614,
-    "ast_hash": "90c4ba6cad7ac28b6f4ba543b615d677",
+    "mtime": 1785354353.5739653,
+    "ast_hash": "f719941df3cb5ce07212daf17d4c6fde",
     "semantic_hash": ""
   },
   "ios/SocialBrain/Models/EncryptedRecordEnvelope.swift": {
@@ -155,23 +155,23 @@
     "semantic_hash": ""
   },
   "ios/SocialBrain/Models/LocalRecords.swift": {
-    "mtime": 1785269367.5962029,
-    "ast_hash": "ac3cda13b023f3c2b5ee20b342e3cfc9",
+    "mtime": 1785354313.7980938,
+    "ast_hash": "9439e9602132b681b9aa344e53623917",
     "semantic_hash": ""
   },
   "ios/SocialBrain/Services/ContentCipher.swift": {
-    "mtime": 1785269627.9275155,
-    "ast_hash": "17590717da7a5b9258a1f96aa31e5b6b",
+    "mtime": 1785354486.8956115,
+    "ast_hash": "1af1e46cc2e365dacb6386694df0e4ba",
     "semantic_hash": ""
   },
   "ios/SocialBrain/Services/FirestoreEnvelopeStore.swift": {
-    "mtime": 1785269485.7986493,
-    "ast_hash": "32c40962422080ef46c479a8543836dd",
+    "mtime": 1785353811.1520455,
+    "ast_hash": "5b58acf9e1f9716dc34a5baef8b9ae6c",
     "semantic_hash": ""
   },
   "ios/SocialBrainTests/ContentCipherTests.swift": {
-    "mtime": 1785269628.9308207,
-    "ast_hash": "59793462a97fb6b9eebfd56e0b45a40e",
+    "mtime": 1785352708.6188602,
+    "ast_hash": "e86c630727128bff9d7c518e69f617f9",
     "semantic_hash": ""
   },
   "metadata.json": {
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1785270437.1912575,
-    "ast_hash": "67b51c2d2fe88bccf83859db2645d856",
+    "mtime": 1785352093.216883,
+    "ast_hash": "0a0354a3da2f597b8234090f22226aa7",
     "semantic_hash": ""
   },
   "colors_used.txt": {
@@ -270,18 +270,18 @@
     "semantic_hash": ""
   },
   "firebase/README.md": {
-    "mtime": 1785270378.2664652,
-    "ast_hash": "b3e00cdc0211a363b9bacfce2a7a2015",
+    "mtime": 1785351093.277435,
+    "ast_hash": "e7c37f355072dc655460efaa9b2c92d6",
     "semantic_hash": ""
   },
   "ios/README.md": {
-    "mtime": 1785269181.6743877,
-    "ast_hash": "b308c177ffb4c70378143a76e1f7527a",
+    "mtime": 1785354408.5132,
+    "ast_hash": "d1bf030d85445ddfd04ba1043175316a",
     "semantic_hash": ""
   },
   "ios/project.yml": {
-    "mtime": 1785266274.0988553,
-    "ast_hash": "ad5189d555ac71b0e29e0784ce6faf57",
+    "mtime": 1785354403.9983518,
+    "ast_hash": "07232ade980c5a143ecea145147707aa",
     "semantic_hash": ""
   },
   "out.txt": {
@@ -365,8 +365,8 @@
     "semantic_hash": ""
   },
   "firebase/functions/src/aiAuth.ts": {
-    "mtime": 1785269350.6929557,
-    "ast_hash": "d23edd51330a931c5558f41443add4b1",
+    "mtime": 1785350904.933734,
+    "ast_hash": "295cca6e35d40417f1617fa4655a24b1",
     "semantic_hash": ""
   },
   "firebase/functions/src/aiContract.ts": {
@@ -390,78 +390,78 @@
     "semantic_hash": ""
   },
   "ios/SocialBrain/Services/AuthenticationStateStore.swift": {
-    "mtime": 1785269961.0989323,
-    "ast_hash": "e7380559b3dbef33c45018fca62d4fdb",
+    "mtime": 1785351358.8947158,
+    "ast_hash": "18512409ef04af43fa4d9ee49dbc1c68",
     "semantic_hash": ""
   },
   "ios/SocialBrain/Services/CalendarService.swift": {
-    "mtime": 1785269605.577588,
-    "ast_hash": "386f81919478a16fa0ba03592eab8528",
+    "mtime": 1785354621.2450762,
+    "ast_hash": "eac09dbc6defe7cce682259fdb1226ae",
     "semantic_hash": ""
   },
   "ios/SocialBrain/Services/LocalCaptureService.swift": {
-    "mtime": 1785269883.5493605,
-    "ast_hash": "77b3d47c303f6920296e808153e82529",
+    "mtime": 1785354613.6393354,
+    "ast_hash": "b1fb2729bbfe2661c4c912a092b8e4a7",
     "semantic_hash": ""
   },
   "ios/SocialBrain/Services/LocalDataResetService.swift": {
-    "mtime": 1785269853.704833,
-    "ast_hash": "da8c76fe7428df21f9b2db45c89b2592",
+    "mtime": 1785354611.64162,
+    "ast_hash": "5fb93c9a6b40c0160e8c8f158ad2566e",
     "semantic_hash": ""
   },
   "ios/SocialBrain/Services/LocalEncryptedContentStore.swift": {
-    "mtime": 1785269355.0852072,
-    "ast_hash": "6c7ebbd5e7a5afa2b56fa15cd42eb913",
+    "mtime": 1785354586.6177173,
+    "ast_hash": "7d3cea7291c344b41254a19d109ceeca",
     "semantic_hash": ""
   },
   "ios/SocialBrain/Views/CalendarViews.swift": {
-    "mtime": 1785270089.0244832,
-    "ast_hash": "6a0f81788ac7de56f228482c0ae95548",
+    "mtime": 1785354371.258338,
+    "ast_hash": "0b2a93184255da7c49556529e6fb0506",
     "semantic_hash": ""
   },
   "ios/SocialBrain/Views/CaptureViews.swift": {
-    "mtime": 1785269963.9460013,
-    "ast_hash": "32b034436f051f0620d5e24f69b6b30c",
+    "mtime": 1785354656.1313505,
+    "ast_hash": "a3586b16f42afe503b15a25673a724d7",
     "semantic_hash": ""
   },
   "ios/SocialBrain/Views/CommunityViews.swift": {
-    "mtime": 1785269972.6212249,
-    "ast_hash": "8766081596f7d2faf839fdcb1f842eb5",
+    "mtime": 1785352435.7958653,
+    "ast_hash": "906f1c07e5dcb67be2f883e330e2b3d5",
     "semantic_hash": ""
   },
   "ios/SocialBrain/Views/HomeAndRecordsViews.swift": {
-    "mtime": 1785269790.0506158,
-    "ast_hash": "bd731919b5176e5b654c714676521b95",
+    "mtime": 1785352432.034541,
+    "ast_hash": "6e85ec895bcb54aa183fc335bac88632",
     "semantic_hash": ""
   },
   "ios/SocialBrain/Views/RecallViews.swift": {
-    "mtime": 1785269999.4648569,
-    "ast_hash": "da1fe4cbe2e7e92ca24d8487422e904c",
+    "mtime": 1785351920.8455627,
+    "ast_hash": "34a76c4c7da8564b8782c829588f9c2c",
     "semantic_hash": ""
   },
   "ios/SocialBrain/Views/RecordSupportViews.swift": {
-    "mtime": 1785270332.7901206,
-    "ast_hash": "4089a3a0d07722ce2dcc5907272ab1d5",
+    "mtime": 1785354652.0604877,
+    "ast_hash": "2fc0f815dd3aed13a0ce5f9e24dab0d6",
     "semantic_hash": ""
   },
   "ios/SocialBrainTests/FirestoreEnvelopeCodecTests.swift": {
-    "mtime": 1785269658.7226937,
-    "ast_hash": "491e62795fc5223597f5a9b4c6f89f7b",
+    "mtime": 1785353801.4307861,
+    "ast_hash": "a0478e6b794b8be7d3bbe7caa499d515",
     "semantic_hash": ""
   },
   "ios/SocialBrainTests/LocalCaptureAndResetTests.swift": {
-    "mtime": 1785269993.3995109,
-    "ast_hash": "95fabe8345d7369f979aba9343b93bd6",
+    "mtime": 1785354667.9694645,
+    "ast_hash": "8daec6aa2f401583c8894e940fb05077",
     "semantic_hash": ""
   },
   "ios/SocialBrainTests/LocalEncryptedContentStoreTests.swift": {
-    "mtime": 1785269658.0427039,
-    "ast_hash": "3f3757ecdfb1a4f7b7f653b2d3bde8d4",
+    "mtime": 1785354588.268527,
+    "ast_hash": "d92ded911770788944d55bbb2e9805a3",
     "semantic_hash": ""
   },
   "ios/SocialBrainTests/ServiceStateTests.swift": {
-    "mtime": 1785269707.5533137,
-    "ast_hash": "775e7f37b1734fe401eaa8af3833d2c6",
+    "mtime": 1785351882.157313,
+    "ast_hash": "0679fac06b45cb53f13550ed2ae441ee",
     "semantic_hash": ""
   },
   "shared/contracts/v1/fixtures/ai-extraction.invalid.json": {
@@ -472,6 +472,161 @@
   "shared/contracts/v1/fixtures/ai-extraction.valid.json": {
     "mtime": 1785269207.1901937,
     "ast_hash": "830314066fae57febac03376d47a12e9",
+    "semantic_hash": ""
+  },
+  ".token-savior-cache.json": {
+    "mtime": 1785354173.4000652,
+    "ast_hash": "28e405a99ce0759d79b7eb687f523aaf",
+    "semantic_hash": ""
+  },
+  "firebase/functions/src/accountDeletion.ts": {
+    "mtime": 1785351167.2343192,
+    "ast_hash": "8672800e810732a17cda568e837d9f66",
+    "semantic_hash": ""
+  },
+  "firebase/functions/src/geminiConfig.ts": {
+    "mtime": 1785351123.3728778,
+    "ast_hash": "5bdba5a2f9d9df34c1739011e7ba473e",
+    "semantic_hash": ""
+  },
+  "firebase/functions/test/account-deletion.test.js": {
+    "mtime": 1785351034.1505458,
+    "ast_hash": "77b01067242ea456fc4b2ab61f5f3c29",
+    "semantic_hash": ""
+  },
+  "ios/Scripts/bootstrap.sh": {
+    "mtime": 1785354405.3916335,
+    "ast_hash": "7fb814f95bd03e64dd1c9b8fdb4229f7",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/App/AppEnvironment.swift": {
+    "mtime": 1785354354.9667017,
+    "ast_hash": "3588d172051bcdc1a2456896f0e8568a",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Models/SocialBrainPersistenceSchema.swift": {
+    "mtime": 1785354371.166884,
+    "ast_hash": "92a5ccf6b33297a6abff067394e13669",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Resources/Assets.xcassets/AccentColor.colorset/Contents.json": {
+    "mtime": 1785351384.5225809,
+    "ast_hash": "a296db59ce534226d82f5710ddbd0f14",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json": {
+    "mtime": 1785353066.2475045,
+    "ast_hash": "c5d5aeafe79232c2195e36ca041e38c5",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Resources/Assets.xcassets/Contents.json": {
+    "mtime": 1785351382.9444296,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Resources/Assets.xcassets/LaunchBackground.colorset/Contents.json": {
+    "mtime": 1785351385.4038777,
+    "ast_hash": "c79809f4525e0ec142c3dd98cc211418",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Services/AIExtractionContracts.swift": {
+    "mtime": 1785354485.0796115,
+    "ast_hash": "be936a7c7ede5576c8be44c1fb90823c",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Services/ApplicationSettingsService.swift": {
+    "mtime": 1785350902.9978702,
+    "ast_hash": "9a0e26aad1fbb1d7f2e1e8df84967c16",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Services/CaptureInputPreparationService.swift": {
+    "mtime": 1785354520.0112643,
+    "ast_hash": "7094cb706b24a7cbab6394bfa27d268d",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Services/ContactImportService.swift": {
+    "mtime": 1785354619.2484965,
+    "ast_hash": "40e15385af52ecba9e3b271b0ed1a509",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Services/EncryptedContentCleanupQueue.swift": {
+    "mtime": 1785350857.3192844,
+    "ast_hash": "71e4523f12b75d5202c83d448a957aad",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Services/ExtractionReviewService.swift": {
+    "mtime": 1785354358.9095964,
+    "ast_hash": "47b62aff4042f5fba817ced934b90a40",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Services/FirebaseFunctionsAIGateway.swift": {
+    "mtime": 1785353291.1596026,
+    "ast_hash": "732dfc470d2c19a5a8d84a59e478c8ed",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Services/LegacyCaptureMigrationService.swift": {
+    "mtime": 1785354615.6238563,
+    "ast_hash": "7d11fd1e62e1f28326c5fcd00c7a7782",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Services/RecordLifecycleService.swift": {
+    "mtime": 1785353133.5907006,
+    "ast_hash": "46a274b665c5368283794d04e0a179dc",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Services/VoiceCaptureService.swift": {
+    "mtime": 1785354617.3807955,
+    "ast_hash": "6d2bacd5d0fff97dab307b40242a61a5",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Views/AIExtractionReviewView.swift": {
+    "mtime": 1785354659.5543363,
+    "ast_hash": "849d0eeb97a6c390019dff5813a9809a",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Views/ArchivedRecordsView.swift": {
+    "mtime": 1785352442.3590126,
+    "ast_hash": "e904d3e1e07c1ef09d3a9bc2853c9354",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Views/ContactImportViews.swift": {
+    "mtime": 1785354663.9341145,
+    "ast_hash": "3e876abe33bc9fbc14a9e133a7bfaa3c",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrainTests/AIExtractionContractsTests.swift": {
+    "mtime": 1785351973.16692,
+    "ast_hash": "8b08abc62c10509c05cd12b0622dc3b6",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrainTests/ExtractionReviewServiceTests.swift": {
+    "mtime": 1785354459.5301416,
+    "ast_hash": "d194f1d8651e3977aebb72cb2a4272af",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrainTests/FirebaseFunctionsErrorMapperTests.swift": {
+    "mtime": 1785353295.6811967,
+    "ast_hash": "2b0e32b732aab6a294021161ed62eb17",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrainTests/RecordLifecycleServiceTests.swift": {
+    "mtime": 1785352682.7762897,
+    "ast_hash": "0c35fb87cbf51da4fe80d04c54c81baa",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrainUITests/SocialBrainLaunchTests.swift": {
+    "mtime": 1785354425.9729128,
+    "ast_hash": "61474692c23f29c4c5bc689a0be42402",
+    "semantic_hash": ""
+  },
+  ".github/workflows/ios.yml": {
+    "mtime": 1785354614.1810458,
+    "ast_hash": "15b462ff76f255adefb8302b4d8ff2f5",
+    "semantic_hash": ""
+  },
+  "ios/SocialBrain/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png": {
+    "mtime": 1785353055.4586365,
+    "ast_hash": "5053af23c890c402215749917824e8f1",
     "semantic_hash": ""
   }
 }
