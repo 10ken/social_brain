@@ -1,0 +1,181 @@
+name: iOS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ios/**"
+      - "shared/contracts/**"
+      - ".github/workflows/ios.yml"
+  pull_request:
+    paths:
+      - "ios/**"
+      - "shared/contracts/**"
+      - ".github/workflows/ios.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Generate and test iOS app
+    runs-on: macos-15
+    timeout-minutes: 35
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+      XCODEGEN_VERSION: 2.45.4
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 26.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d "$DEVELOPER_DIR"
+          sudo xcode-select --switch "$DEVELOPER_DIR"
+          xcodebuild -version
+          xcodebuild -version | grep -F "Xcode 26.3"
+
+      - name: Install XcodeGen ${{ env.XCODEGEN_VERSION }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/xcodegen.zip"
+          destination="$RUNNER_TEMP/xcodegen-release"
+          curl -fL --retry 3 --retry-delay 2 \
+            "https://github.com/yonaskolb/XcodeGen/releases/download/${XCODEGEN_VERSION}/xcodegen.zip" \
+            -o "$archive"
+          unzip -q "$archive" -d "$destination"
+          echo "$destination/xcodegen/bin" >> "$GITHUB_PATH"
+
+      - name: Verify XcodeGen version
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodegen --version | grep -F "Version: ${XCODEGEN_VERSION}"
+
+      - name: Lint source and validate iOS metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          plutil -lint \
+            ios/SocialBrain/Resources/Info.plist \
+            ios/SocialBrain/Resources/PrivacyInfo.xcprivacy \
+            ios/SocialBrain/Resources/SocialBrain.entitlements
+          xcrun swift-format lint --recursive \
+            ios/SocialBrain \
+            ios/SocialBrainTests \
+            ios/SocialBrainUITests
+
+      - name: Cache Swift Package downloads
+        uses: actions/cache@v4
+        with:
+          path: ios/.build/SourcePackages
+          key: ios-spm-xcode-26.3-${{ hashFiles('ios/project.yml', 'ios/Package.resolved') }}
+          restore-keys: |
+            ios-spm-xcode-26.3-
+
+      - name: Validate, generate, and resolve local dependencies
+        shell: bash
+        run: ios/Scripts/bootstrap.sh --ci --local
+
+      - name: Select an iPhone simulator on iOS 26.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          simulator_runtime="com.apple.CoreSimulator.SimRuntime.iOS-26-2"
+          simulator_id="$(
+            xcrun simctl list devices available --json | python3 -c '
+          import json
+          import sys
+
+          runtime = sys.argv[1]
+          devices = json.load(sys.stdin).get("devices", {}).get(runtime, [])
+          candidates = [
+              device for device in devices
+              if device.get("isAvailable") and device.get("name", "").startswith("iPhone")
+          ]
+          if not candidates:
+              raise SystemExit(f"No available iPhone simulator for {runtime}")
+          print(candidates[0]["udid"])
+          ' "$simulator_runtime"
+          )"
+          test -n "$simulator_id"
+          xcrun simctl boot "$simulator_id" || true
+          xcrun simctl bootstatus "$simulator_id" -b
+          echo "SIMULATOR_DESTINATION=platform=iOS Simulator,id=$simulator_id" >> "$GITHUB_ENV"
+
+      - name: Build Local tests for testing
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild build-for-testing \
+            -project ios/SocialBrain.xcodeproj \
+            -scheme "SocialBrain-Local" \
+            -testPlan Local \
+            -destination "$SIMULATOR_DESTINATION" \
+            -clonedSourcePackagesDirPath "$PWD/ios/.build/SourcePackages" \
+            -disableAutomaticPackageResolution \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run Local unit and UI tests without rebuilding
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild test-without-building \
+            -project ios/SocialBrain.xcodeproj \
+            -scheme "SocialBrain-Local" \
+            -testPlan Local \
+            -destination "$SIMULATOR_DESTINATION" \
+            -clonedSourcePackagesDirPath "$PWD/ios/.build/SourcePackages" \
+            -disableAutomaticPackageResolution \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            -resultBundlePath "$RUNNER_TEMP/TestResults.xcresult" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Analyze Local app
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild analyze \
+            -project ios/SocialBrain.xcodeproj \
+            -scheme "SocialBrain-Local" \
+            -destination "$SIMULATOR_DESTINATION" \
+            -clonedSourcePackagesDirPath "$PWD/ios/.build/SourcePackages" \
+            -disableAutomaticPackageResolution \
+            -derivedDataPath "$RUNNER_TEMP/AnalyzeDerivedData" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Export test attachments
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          result_bundle="$RUNNER_TEMP/TestResults.xcresult"
+          attachments_dir="$RUNNER_TEMP/TestAttachments"
+          [[ -d "$result_bundle" ]] || exit 0
+          mkdir -p "$attachments_dir"
+          xcrun xcresulttool export attachments \
+            --path "$result_bundle" \
+            --output-path "$attachments_dir"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-test-results-and-attachments
+          path: |
+            ${{ runner.temp }}/TestResults.xcresult
+            ${{ runner.temp }}/TestAttachments
+            ${{ runner.temp }}/DerivedData/Logs/Test
+            ${{ runner.temp }}/AnalyzeDerivedData/Logs/Build
+            ios/SocialBrain.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+          if-no-files-found: ignore

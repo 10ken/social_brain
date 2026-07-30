@@ -14,8 +14,9 @@ extension SyncableRecord {
 }
 
 @MainActor
-func saveLocalChanges(_ context: ModelContext) {
-    try? context.save()
+@discardableResult
+func saveLocalChanges(_ context: ModelContext) -> Bool {
+    LocalPersistenceFailureReporter.shared.save(context)
 }
 
 struct RecordLifecycleActions: View {
@@ -92,17 +93,17 @@ struct ConfidenceBadge: View {
 
     private var label: String {
         switch state.lowercased() {
-        case "confirmed": "Confirmed"
-        case "needs_review": "Needs review"
-        default: "Suggested"
+        case "confirmed": return "Confirmed"
+        case "needs_review": return "Needs review"
+        default: return "Suggested"
         }
     }
 
     private var color: Color {
         switch state.lowercased() {
-        case "confirmed": .green
-        case "needs_review": .orange
-        default: .blue
+        case "confirmed": return .green
+        case "needs_review": return .orange
+        default: return .blue
         }
     }
 
@@ -130,9 +131,11 @@ struct CloudSyncUnavailableSection: View {
 
 @MainActor
 struct AuthenticationAndAIStatusView: View {
-    @StateObject private var authentication = AuthenticationStateStore()
-    @StateObject private var appCheck = AppCheckStateStore(providerConfigured: false)
+    @EnvironmentObject private var environment: AppEnvironment
     @State private var appleNonce = ""
+
+    private var authentication: AuthenticationStateStore { environment.authentication }
+    private var appCheck: AppCheckStateStore { environment.appCheck }
 
     private var aiAvailability: ProtectedFeatureAvailability {
         ProtectedFeatureAvailability.aiAccess(
@@ -197,17 +200,30 @@ struct AuthenticationAndAIStatusView: View {
         Section("Sign in") {
             if authentication.state.userID != nil {
                 Button("Sign Out", role: .destructive) { authentication.signOut() }
+                NavigationLink {
+                    AccountDeletionView()
+                } label: {
+                    Label("Delete Firebase Account…", systemImage: "person.crop.circle.badge.minus")
+                        .foregroundStyle(.red)
+                }
             } else {
                 SignInWithAppleButton(.signIn) { request in
                     appleNonce = AuthenticationStateStore.makeAppleNonce()
                     request.requestedScopes = [.fullName, .email]
                     request.nonce = AuthenticationStateStore.sha256(appleNonce)
                 } onCompletion: { result in
-                    guard case let .success(authorization) = result,
-                          let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
-                          let token = credential.identityToken
-                    else { return }
-                    Task { await authentication.signInWithApple(identityToken: token, rawNonce: appleNonce) }
+                    switch result {
+                    case let .success(authorization):
+                        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+                              let token = credential.identityToken
+                        else {
+                            authentication.reportAppleTokenFailure()
+                            return
+                        }
+                        Task { await authentication.signInWithApple(identityToken: token, rawNonce: appleNonce) }
+                    case let .failure(error):
+                        authentication.handleAppleAuthorizationFailure(error)
+                    }
                 }
                 .signInWithAppleButtonStyle(.black)
                 .frame(height: 44)
@@ -216,6 +232,7 @@ struct AuthenticationAndAIStatusView: View {
                     guard let controller = topViewController() else { return }
                     Task { await authentication.signInWithGoogle(presenting: controller) }
                 }
+                .accessibilityIdentifier("auth.google")
             }
         }
     }
@@ -241,6 +258,64 @@ struct AuthenticationAndAIStatusView: View {
         if let tab = root as? UITabBarController { return topViewController(from: tab.selectedViewController) }
         if let presented = root?.presentedViewController { return topViewController(from: presented) }
         return root
+    }
+}
+
+@MainActor
+private struct AccountDeletionView: View {
+    @EnvironmentObject private var environment: AppEnvironment
+    @State private var confirmation = ""
+    @State private var showingConfirmation = false
+    @State private var isDeleting = false
+    @State private var status: String?
+
+    var body: some View {
+        List {
+            Section("What this deletes") {
+                Text("This removes the Firebase account and server-side account data. It does not erase this device automatically; use Start Clean separately if you want to erase local encrypted content.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            Section {
+                Button("Delete Firebase Account…", role: .destructive) {
+                    confirmation = ""
+                    showingConfirmation = true
+                }
+                .disabled(isDeleting)
+            }
+            if let status {
+                Section {
+                    Label(status, systemImage: status.contains("deleted") ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                        .foregroundStyle(status.contains("deleted") ? .green : .red)
+                }
+            }
+        }
+        .navigationTitle("Delete Account")
+        .alert("Delete Firebase account?", isPresented: $showingConfirmation) {
+            TextField("Type DELETE ACCOUNT", text: $confirmation)
+                .textInputAutocapitalization(.characters)
+            Button("Delete Account", role: .destructive) { deleteAccount() }
+                .disabled(confirmation.uppercased() != "DELETE ACCOUNT")
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("You may need to sign in again first because account deletion requires recent authentication.")
+        }
+    }
+
+    private func deleteAccount() {
+        isDeleting = true
+        status = nil
+        Task {
+            do {
+                try await environment.aiGateway.deleteAccountData()
+                status = "Firebase account deleted. Use Start Clean separately to erase this device."
+            } catch let error as AIClientError {
+                status = error.localizedDescription
+            } catch {
+                status = "Account deletion could not be completed. Please try again."
+            }
+            isDeleting = false
+        }
     }
 }
 
@@ -312,7 +387,7 @@ struct DataManagementView: View {
     private let resetService = LocalDataResetService()
     @State private var confirmationText = ""
     @State private var isShowingConfirmation = false
-    @State private var statusMessage: String?
+    @State private var status: LocalResetStatus?
 
     private let confirmationPhrase = "START CLEAN"
 
@@ -337,10 +412,10 @@ struct DataManagementView: View {
                 }
             }
 
-            if let statusMessage {
+            if let status {
                 Section {
-                    Label(statusMessage, systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
+                    Label(status.message, systemImage: status.isFailure ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                        .foregroundStyle(status.isFailure ? .red : .green)
                 }
             }
         }
@@ -361,10 +436,28 @@ struct DataManagementView: View {
     private func eraseLocalData() {
         do {
             try resetService.wipeAllLocalContent(in: modelContext)
-            statusMessage = "Local records erased."
+            status = .success("Local records erased.")
+        } catch let error as LocalDataResetError {
+            status = .failure(error.localizedDescription)
         } catch {
-            statusMessage = "Could not erase all local records. Try again."
+            status = .failure("Could not erase all local records. Try again.")
         }
+    }
+}
+
+private enum LocalResetStatus {
+    case success(String)
+    case failure(String)
+
+    var message: String {
+        switch self {
+        case .success(let message), .failure(let message): return message
+        }
+    }
+
+    var isFailure: Bool {
+        if case .failure = self { return true }
+        return false
     }
 }
 
@@ -389,6 +482,11 @@ struct SettingsView: View {
                     DataManagementView()
                 } label: {
                     Label("Data Management", systemImage: "externaldrive")
+                }
+                NavigationLink {
+                    ArchivedRecordsView()
+                } label: {
+                    Label("Archived Records", systemImage: "archivebox")
                 }
             }
         }

@@ -21,8 +21,11 @@ until the user signs in and the Firebase project is configured.
 ## iOS
 
 The native iOS source and its XcodeGen project definition are in
-[`ios`](ios). It is designed for iOS 17+. Once full Xcode is available, follow
-the setup and validation checklist in [`ios/README.md`](ios/README.md).
+[`ios`](ios). It is designed for iOS 17+. Once full Xcode is available, run
+`ios/Scripts/bootstrap.sh --local` to validate, generate, and resolve the
+local-only scheme; Firebase credentials are only needed for the separate
+Firebase scheme. See the setup and validation checklist in
+[`ios/README.md`](ios/README.md).
 
 ## Development notes
 

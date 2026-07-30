@@ -11,6 +11,10 @@ import UIKit
 
 enum FirebaseRuntime {
     static var isConfigured: Bool { FirebaseApp.app() != nil }
+    static var appCheckProviderConfigured: Bool {
+        FirebaseBuildConfiguration.appCheckProvider != "" &&
+            FirebaseBuildConfiguration.appCheckProvider != "disabled"
+    }
     static let configurationRequiredMessage = "Firebase configuration is not installed on this device."
 }
 
@@ -39,8 +43,10 @@ enum AppCheckState: Equatable {
     case failed(String)
 
     var isReady: Bool {
-        guard case .ready = self else { return false }
-        return true
+        guard case let .ready(expirationDate) = self else { return false }
+        // Refresh shortly before expiry rather than discovering an expired
+        // token only after a protected callable has failed.
+        return expirationDate > Date().addingTimeInterval(60)
     }
 }
 
@@ -115,7 +121,11 @@ final class AuthenticationStateStore: ObservableObject {
             )
             _ = try await Auth.auth().signIn(with: credential)
         } catch {
-            state = .failed("Google Sign-In could not be completed. Please try again.")
+            if error is CancellationError || (error as NSError).code == -5 {
+                state = .signedOut
+            } else {
+                state = .failed("Google Sign-In could not be completed. Please try again.")
+            }
         }
     }
 
@@ -158,6 +168,19 @@ final class AuthenticationStateStore: ObservableObject {
         }
     }
 
+    func handleAppleAuthorizationFailure(_ error: Error) {
+        if let authorizationError = error as? ASAuthorizationError,
+           authorizationError.code == .canceled {
+            state = .signedOut
+        } else {
+            state = .failed("Apple Sign-In could not be completed. Please try again.")
+        }
+    }
+
+    func reportAppleTokenFailure() {
+        state = .failed("Apple Sign-In did not return an identity token. Please try again.")
+    }
+
     static func makeAppleNonce(length: Int = 32) -> String {
         precondition(length > 0)
         let alphabet = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
@@ -169,7 +192,7 @@ final class AuthenticationStateStore: ObservableObject {
             guard status == errSecSuccess else {
                 preconditionFailure("Unable to generate a secure Apple Sign-In nonce.")
             }
-            if random < alphabet.count {
+            if Int(random) < alphabet.count {
                 nonce.append(alphabet[Int(random)])
                 remaining -= 1
             }
@@ -182,15 +205,14 @@ final class AuthenticationStateStore: ObservableObject {
     }
 }
 
-/// App Check is intentionally opt-in at source level. A production build must
-/// install its App Attest/DeviceCheck provider before this store is created with
-/// `providerConfigured: true`; otherwise protected calls remain disabled.
+/// App Check is installed by the app delegate before Firebase configuration.
+/// The store only reports ready after it has obtained an unexpired token.
 @MainActor
 final class AppCheckStateStore: ObservableObject {
     @Published private(set) var state: AppCheckState
     private let providerConfigured: Bool
 
-    init(providerConfigured: Bool = false) {
+    init(providerConfigured: Bool = FirebaseRuntime.appCheckProviderConfigured) {
         self.providerConfigured = providerConfigured
         if !FirebaseRuntime.isConfigured {
             state = .unavailable(FirebaseRuntime.configurationRequiredMessage)
@@ -219,5 +241,15 @@ final class AppCheckStateStore: ObservableObject {
             // Do not surface provider or network internals in the UI.
             state = .failed("App Check verification failed. Please try again later.")
         }
+    }
+
+    func refreshIfNeeded() async {
+        let shouldForceRefresh: Bool
+        if case let .ready(expirationDate) = state {
+            shouldForceRefresh = expirationDate <= Date().addingTimeInterval(60)
+        } else {
+            shouldForceRefresh = false
+        }
+        await refresh(forceRefresh: shouldForceRefresh)
     }
 }

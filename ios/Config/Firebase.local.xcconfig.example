@@ -1,0 +1,5 @@
+// Copy this file to Firebase.local.xcconfig (which is ignored by Git) and set
+// the value to the REVERSED_CLIENT_ID from GoogleService-Info.plist.
+GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.REPLACE_WITH_REAL_REVERSED_CLIENT_ID
+FUNCTIONS_REGION = us-central1
+SOCIAL_BRAIN_DEVELOPMENT_TEAM = REPLACE_WITH_APPLE_DEVELOPER_TEAM_ID

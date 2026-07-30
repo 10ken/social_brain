@@ -58,7 +58,13 @@ enum FirestoreEnvelopeCodec {
             throw CloudSyncError.malformedEnvelope
         }
 
-        let deletedAtMs = int64Value(data["deletedAtMs"])
+        let rawDeletedAtMs = data["deletedAtMs"]
+        let deletedAtMs = int64Value(rawDeletedAtMs)
+        guard (rawDeletedAtMs == nil || deletedAtMs != nil),
+              deletedAtMs.map({ $0 >= 0 }) ?? true
+        else {
+            throw CloudSyncError.malformedEnvelope
+        }
         guard deleted == (deletedAtMs != nil) else {
             throw CloudSyncError.malformedEnvelope
         }

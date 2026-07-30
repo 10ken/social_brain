@@ -229,19 +229,13 @@ struct PersonDetailView: View {
                 RecordLifecycleActions(
                     isArchived: person.archivedAt != nil,
                     archive: {
-                        person.archivedAt = .now
-                        person.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().archive(person, in: modelContext)
                     },
                     restore: {
-                        person.archivedAt = nil
-                        person.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().restore(person, in: modelContext)
                     },
                     delete: {
-                        person.deletedAt = .now
-                        person.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().softDelete(person: person, in: modelContext)
                     }
                 )
             }
@@ -340,10 +334,11 @@ struct PersonEditorView: View {
         record.markUpdated()
         if person == nil { modelContext.insert(record) }
         if let sourceCapture {
-            sourceCapture.processed = true
+            sourceCapture.reviewState = CaptureReviewState.inProgress.rawValue
+            sourceCapture.processed = false
             sourceCapture.markUpdated()
         }
-        saveLocalChanges(modelContext)
+        guard saveLocalChanges(modelContext) else { return }
         dismiss()
     }
 }
@@ -455,19 +450,13 @@ struct GroupDetailView: View {
                 RecordLifecycleActions(
                     isArchived: group.archivedAt != nil,
                     archive: {
-                        group.archivedAt = .now
-                        group.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().archive(group, in: modelContext)
                     },
                     restore: {
-                        group.archivedAt = nil
-                        group.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().restore(group, in: modelContext)
                     },
                     delete: {
-                        group.deletedAt = .now
-                        group.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().softDelete(group: group, in: modelContext)
                     }
                 )
             }
@@ -520,7 +509,7 @@ struct GroupEditorView: View {
         record.groupDescription = optional(groupDescription)
         record.markUpdated()
         if group == nil { modelContext.insert(record) }
-        saveLocalChanges(modelContext)
+        guard saveLocalChanges(modelContext) else { return }
         dismiss()
     }
 }
@@ -542,7 +531,7 @@ private struct GroupMemberPickerView: View {
             List(availablePeople) { person in
                 Button {
                     modelContext.insert(GroupMembershipRecord(groupID: group.id, personID: person.id))
-                    saveLocalChanges(modelContext)
+                    guard saveLocalChanges(modelContext) else { return }
                     dismiss()
                 } label: {
                     Label(person.fullName, systemImage: "person.badge.plus")
@@ -650,19 +639,13 @@ struct RelationshipDetailView: View {
                 RecordLifecycleActions(
                     isArchived: relationship.archivedAt != nil,
                     archive: {
-                        relationship.archivedAt = .now
-                        relationship.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().archive(relationship, in: modelContext)
                     },
                     restore: {
-                        relationship.archivedAt = nil
-                        relationship.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().restore(relationship, in: modelContext)
                     },
                     delete: {
-                        relationship.deletedAt = .now
-                        relationship.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().softDelete(relationship, in: modelContext)
                     }
                 )
             }
@@ -763,7 +746,7 @@ struct RelationshipEditorView: View {
         record.evidenceText = optional(evidenceText)
         record.markUpdated()
         if relationship == nil { modelContext.insert(record) }
-        saveLocalChanges(modelContext)
+        guard saveLocalChanges(modelContext) else { return }
         dismiss()
     }
 }

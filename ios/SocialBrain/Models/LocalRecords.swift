@@ -8,10 +8,26 @@ protocol SyncableRecord: AnyObject {
     var deletedAt: Date? { get set }
 }
 
+/// The stored raw value keeps SwiftData migrations lightweight while callers use
+/// this type to avoid inventing link semantics at each calendar call site.
+enum CalendarLinkMode: String, Codable, CaseIterable {
+    case imported
+    case exported
+}
+
+/// Review is deliberately separate from whether a record was manually created
+/// from a capture. A capture is only complete after every AI suggestion has a
+/// decision, or the person explicitly finishes review.
+enum CaptureReviewState: String, Codable, CaseIterable {
+    case pending
+    case inProgress
+    case completed
+}
+
 @Model final class PersonRecord: Identifiable, SyncableRecord {
     @Attribute(.unique) var id: UUID
-    var fullName: String; var nickname: String?; var birthday: String?; var location: String?; var notes: String?; var phoneNumber: String?; var email: String?; var isImported: Bool; var contactIdentifier: String?; var isSelf: Bool; var sourceID: UUID?; var evidenceText: String?; var createdAt: Date; var updatedAt: Date; var archivedAt: Date?; var deletedAt: Date?
-    init(fullName: String, email: String? = nil) { id = UUID(); self.fullName = fullName; nickname = nil; birthday = nil; location = nil; notes = nil; phoneNumber = nil; self.email = email; isImported = false; contactIdentifier = nil; isSelf = false; sourceID = nil; evidenceText = nil; createdAt = .now; updatedAt = .now; archivedAt = nil; deletedAt = nil }
+    var fullName: String; var nickname: String?; var birthday: String?; var location: String?; var notes: String?; var phoneNumber: String?; var email: String?; var isImported: Bool; var contactIdentifier: String?; var isSelf: Bool; var sourceID: UUID?; var confidenceState: String = "confirmed"; var evidenceText: String?; var createdAt: Date; var updatedAt: Date; var archivedAt: Date?; var deletedAt: Date?
+    init(fullName: String, email: String? = nil) { id = UUID(); self.fullName = fullName; nickname = nil; birthday = nil; location = nil; notes = nil; phoneNumber = nil; self.email = email; isImported = false; contactIdentifier = nil; isSelf = false; sourceID = nil; confidenceState = "confirmed"; evidenceText = nil; createdAt = .now; updatedAt = .now; archivedAt = nil; deletedAt = nil }
 }
 
 @Model final class GroupRecord: Identifiable, SyncableRecord {
@@ -34,8 +50,13 @@ protocol SyncableRecord: AnyObject {
 
 @Model final class SocialEventRecord: Identifiable, SyncableRecord {
     @Attribute(.unique) var id: UUID
-    var title: String; var startTime: Date?; var endTime: Date?; var location: String?; var groupID: UUID?; var sourceID: UUID?; var evidenceText: String?; var dateText: String?; var confidenceState: String; var createdAt: Date; var updatedAt: Date; var archivedAt: Date?; var deletedAt: Date?
-    init(title: String, startTime: Date? = nil) { id = UUID(); self.title = title; self.startTime = startTime; endTime = nil; location = nil; groupID = nil; sourceID = nil; evidenceText = nil; dateText = nil; confidenceState = "confirmed"; createdAt = .now; updatedAt = .now; archivedAt = nil; deletedAt = nil }
+    var title: String; var startTime: Date?; var endTime: Date?; var location: String?; var groupID: UUID?; var sourceID: UUID?; var evidenceText: String?; var dateText: String?; var confidenceState: String; var externalCalendarIdentifier: String?; var externalEventIdentifier: String?; var calendarLinkMode: String?; var createdAt: Date; var updatedAt: Date; var archivedAt: Date?; var deletedAt: Date?
+    init(title: String, startTime: Date? = nil) { id = UUID(); self.title = title; self.startTime = startTime; endTime = nil; location = nil; groupID = nil; sourceID = nil; evidenceText = nil; dateText = nil; confidenceState = "confirmed"; externalCalendarIdentifier = nil; externalEventIdentifier = nil; calendarLinkMode = nil; createdAt = .now; updatedAt = .now; archivedAt = nil; deletedAt = nil }
+
+    var externalCalendarLinkMode: CalendarLinkMode? {
+        guard let calendarLinkMode else { return nil }
+        return CalendarLinkMode(rawValue: calendarLinkMode)
+    }
 }
 
 @Model final class EventAttendeeRecord: Identifiable, SyncableRecord {
@@ -56,12 +77,20 @@ protocol SyncableRecord: AnyObject {
     // one-time local migration path. New captures use the encrypted-reference
     // fields below and leave these legacy fields empty.
     var type: String; var rawContent: String; var attachmentPath: String?; var analyzedJSON: String?
-    var encryptedContentReference: String?; var encryptedAttachmentReference: String?; var encryptedAnalysisReference: String?; var contentPreview: String?; var sourceLabel: String?
+    var encryptedContentReference: String?; var encryptedAttachmentReference: String?; var encryptedAnalysisReference: String?; var encryptedReviewReference: String?; var contentPreview: String?; var sourceLabel: String?
+    var attachmentMIMEType: String?; var attachmentFileExtension: String?; var attachmentOriginalName: String?; var attachmentByteCount: Int?
+    var reviewState: String; var reviewSuggestionCount: Int; var reviewResolvedCount: Int
     var processed: Bool; var createdAt: Date; var updatedAt: Date; var archivedAt: Date?; var deletedAt: Date?
     init(type: String, rawContent: String = "") {
         id = UUID(); self.type = type; self.rawContent = rawContent; attachmentPath = nil; analyzedJSON = nil
-        encryptedContentReference = nil; encryptedAttachmentReference = nil; encryptedAnalysisReference = nil; contentPreview = nil; sourceLabel = nil
+        encryptedContentReference = nil; encryptedAttachmentReference = nil; encryptedAnalysisReference = nil; encryptedReviewReference = nil; contentPreview = nil; sourceLabel = nil
+        attachmentMIMEType = nil; attachmentFileExtension = nil; attachmentOriginalName = nil; attachmentByteCount = nil
+        reviewState = CaptureReviewState.pending.rawValue; reviewSuggestionCount = 0; reviewResolvedCount = 0
         processed = false; createdAt = .now; updatedAt = .now; archivedAt = nil; deletedAt = nil
+    }
+
+    var currentReviewState: CaptureReviewState {
+        CaptureReviewState(rawValue: reviewState) ?? .pending
     }
 }
 

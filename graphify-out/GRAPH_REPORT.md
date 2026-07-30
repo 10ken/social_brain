@@ -1,15 +1,16 @@
-# Graph Report - .  (2026-07-28)
+# Graph Report - social_brain  (2026-07-28)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 81 files · ~61,876 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 769 nodes · 1174 edges · 67 communities (52 shown, 15 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.8)
+- 1375 nodes · 2490 edges · 90 communities (82 shown, 8 thin omitted)
+- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 175 edges (avg confidence: 0.79)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5231d1ad`
+- Built from commit: `97090797`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -17,9 +18,9 @@
 - MainAppScreens.kt
 - RecordType
 - ai-extraction.schema.json
-- String
-- AppContainerView.swift
-- ContentCipher.swift
+- SocialEventRecord
+- CommunityViews.swift
+- .generateKey
 - AppDatabase
 - AppRepository
 - AppViewModel
@@ -33,17 +34,17 @@
 - Social Memory Changelog
 - Reminder
 - Memory
-- Person
+- CalendarAuthorizationState
 - 2. Fact & Observation Observation Tables
-- .generateFallback
+- AiAccessState
 - enum
 - Component Guidelines
 - Relationship
 - 1. Schema Specifications
 - compilerOptions
 - required
-- index.js
-- FirebaseAppDelegate
+- LocalEncryptedContentStore
+- .application
 - 1. Color Palette Tokens
 - Social Memory UX/UI Design
 - properties
@@ -51,43 +52,67 @@
 - Social Memory UX/UI Guidelines
 - AesGcmCipher
 - 2. Security Safeguards
-- index.ts
-- .prepopulateDataIfEmpty
-- Entities.kt
+- aiContract.ts
+- CaptureComposerView
+- Equatable
 - record-envelope.schema.json
-- ExampleRobolectricTest
+- CaptureRecord
 - AI Extraction & Review Workflow
-- Social Memory Architectures
+- Social Brain architecture
 - Calendar Heatmap UX
 - type
 - ciphertext
 - nonce
 - applet/replace.js
 - app/replace.js
-- SecureAiGateway
+- String
 - revision
 - ExampleInstrumentedTest
+- GroupRecord
 - ExampleUnitTest
 - AesGcmCipherTest
-- Run and deploy your AI Studio app
+- SocialEventEditorView
 - deviceId
-- keyVersion
-- schemaVersion
-- firebase/README.md
-- ios/README.md
+- View
+- .envelope
+- Social Brain
+- PersonRecord
 - contracts/README.md
+- Foundation
+- ReminderRecord
+- properties
+- enum
+- $defs
+- AuthenticationStateStore.swift
+- AuthenticationStateStore
+- AppCheckState
+- CaptureKind
+- InMemoryContentKeyProvider
+- required
+- confidenceState
+- properties
+- AuthenticationAndAIStatusView
+- ai-contract.test.js
+- RecallWorkspaceView
+- .baseQuery
+- optionalText
+- AuthenticationState
+- parseTextToBlocks
+- ExtractionContractTest
+- name
+- id
 
 ## God Nodes (most connected - your core abstractions)
-1. `AppViewModel` - 81 edges
+1. `AppViewModel` - 84 edges
 2. `AppRepository` - 52 edges
-3. `Person` - 34 edges
-4. `Memory` - 26 edges
-5. `SocialEvent` - 25 edges
-6. `Reminder` - 25 edges
-7. `AppScreen` - 20 edges
-8. `Group` - 19 edges
-9. `Relationship` - 18 edges
-10. `MainAppContainer()` - 18 edges
+3. `PersonRecord` - 36 edges
+4. `Person` - 34 edges
+5. `CaptureRecord` - 32 edges
+6. `Memory` - 26 edges
+7. `LocalEncryptedContentStore` - 26 edges
+8. `SocialEvent` - 25 edges
+9. `Reminder` - 25 edges
+10. `GroupRecord` - 24 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `ReviewExtractionScreen()` --calls--> `ExtractionResult`  [INFERRED]
@@ -96,75 +121,75 @@
   app/src/main/java/com/example/ui/screens/MainAppScreens.kt → app/src/main/java/com/example/ui/theme/Color.kt
 - `.body` --calls--> `AppContainerView`  [INFERRED]
   ios/SocialBrain/App/SocialBrainApp.swift → ios/SocialBrain/App/AppContainerView.swift
-- `.body` --calls--> `PersonRecord`  [EXTRACTED]
-  ios/SocialBrain/App/AppContainerView.swift → ios/SocialBrain/Models/LocalRecords.swift
-- `MainActivity` --references--> `AppViewModel`  [EXTRACTED]
-  app/src/main/java/com/example/MainActivity.kt → app/src/main/java/com/example/ui/AppViewModel.kt
+- `.body` --calls--> `CaptureWorkspaceView`  [INFERRED]
+  ios/SocialBrain/App/AppContainerView.swift → ios/SocialBrain/Views/CaptureViews.swift
+- `.body` --calls--> `HomeWorkspaceView`  [INFERRED]
+  ios/SocialBrain/App/AppContainerView.swift → ios/SocialBrain/Views/HomeAndRecordsViews.swift
 
 ## Import Cycles
 - None detected.
 
-## Communities (67 total, 15 thin omitted)
+## Communities (90 total, 8 thin omitted)
 
 ### Community 0 - "MainAppScreens.kt"
-Cohesion: 0.12
-Nodes (39): AnnotatedString, AddEventScreen(), AddGroupScreen(), AddPersonScreen(), AskScreen(), BottomNavBar(), Bullet, CalendarScreen() (+31 more)
+Cohesion: 0.17
+Nodes (31): AnnotatedString, AddEventScreen(), AddGroupScreen(), AddPersonScreen(), AiAccessNotice(), AskScreen(), BottomNavBar(), CalendarScreen() (+23 more)
 
 ### Community 1 - "RecordType"
-Cohesion: 0.08
-Nodes (32): CaseIterable, Codable, Comparable, EncryptedRecordEnvelope, FirebaseAuth, FirebaseFirestore, Firestore, Int (+24 more)
+Cohesion: 0.06
+Nodes (42): App, CaseIterable, Codable, Comparable, Hashable, AppContainerView, AppTab, calendar (+34 more)
 
 ### Community 2 - "ai-extraction.schema.json"
-Cohesion: 0.05
-Nodes (38): confidenceState, events, evidence, memories, needs_review, people, relationships, reminders (+30 more)
+Cohesion: 0.06
+Nodes (37): events, memories, people, relationships, reminders, additionalProperties, description, items (+29 more)
 
-### Community 3 - "String"
-Cohesion: 0.17
-Nodes (21): AnyObject, Date, Foundation, Identifiable, HomeView, .body, .reminders, AppSettingsRecord (+13 more)
+### Community 3 - "SocialEventRecord"
+Cohesion: 0.21
+Nodes (11): Identifiable, AppSettingsRecord, EventAttendeeRecord, GroupMembershipRecord, MemoryRecord, RelationshipRecord, SocialEventRecord, Date (+3 more)
 
-### Community 4 - "AppContainerView.swift"
-Cohesion: 0.10
-Nodes (27): App, Hashable, AddPersonView, .body, AppContainerView, .body, AppTab, calendar (+19 more)
+### Community 4 - "CommunityViews.swift"
+Cohesion: 0.14
+Nodes (16): .body, CalendarWorkspaceView, CommunitiesWorkspaceView, .body, GroupsListView, .archivedGroups, .body, .groups (+8 more)
 
-### Community 5 - "ContentCipher.swift"
-Cohesion: 0.09
-Nodes (20): CryptoKit, Error, ContentCipher, ContentCipherError, invalidCombinedCiphertext, invalidKeyLength, keychain, KeychainStore (+12 more)
+### Community 5 - ".generateKey"
+Cohesion: 0.22
+Nodes (8): ContentCipher, ContentCipherError, invalidCombinedCiphertext, invalidKeyLength, randomGenerationFailed, Data, ContentCipherTests, OSStatus
 
 ### Community 6 - "AppDatabase"
-Cohesion: 0.09
-Nodes (10): AppDatabase, getDatabase(), migrate(), AppSettingsDao, CaptureDao, Capture, AppSettingsEntity, Context (+2 more)
+Cohesion: 0.13
+Nodes (8): AppDatabase, getDatabase(), migrate(), CaptureDao, Capture, Context, RoomDatabase, SupportSQLiteDatabase
 
 ### Community 7 - "AppRepository"
-Cohesion: 0.13
-Nodes (3): AppRepository, Capture, Flow
+Cohesion: 0.10
+Nodes (5): PersonDao, Person, AppRepository, Capture, Flow
 
 ### Community 8 - "AppViewModel"
-Cohesion: 0.13
-Nodes (5): AndroidViewModel, AppViewModel, Capture, Flow, StateFlow
+Cohesion: 0.08
+Nodes (9): android, AndroidViewModel, AppViewModel, Capture, ChatMessage, Bitmap, Flow, ReviewExtraction (+1 more)
 
 ### Community 9 - "ConfidenceState"
 Cohesion: 0.11
 Nodes (16): MainActivity, calendarCellColors(), confidenceColors(), ConfidenceState, CONFIRMED, ERROR, IGNORED, NEEDS_REVIEW (+8 more)
 
 ### Community 10 - "AppScreen"
-Cohesion: 0.10
-Nodes (17): AddEvent, AddGroup, AddPerson, AppScreen, Ask, Calendar, ChatMessage, Communities (+9 more)
+Cohesion: 0.14
+Nodes (14): AddEvent, AddGroup, AddPerson, AppScreen, Ask, Calendar, Communities, EditGroup (+6 more)
 
 ### Community 11 - "2. Reusable Modular Architecture (11 Components)"
 Cohesion: 0.10
 Nodes (20): 1. Required Structural Layout, 2. Reusable Modular Architecture (11 Components), 3. Interaction & State Safeguards, Home Page (Weekly Review) Design Specification, I. `BottomNavBar`, I. Progress Bar Removal, II. Duplicate Event Collapsing, II. `HomeHeader` (+12 more)
 
 ### Community 12 - "package.json"
-Cohesion: 0.10
-Nodes (20): firebase-admin, firebase-functions, dependencies, firebase-admin, firebase-functions, @google/generative-ai, devDependencies, typescript (+12 more)
+Cohesion: 0.09
+Nodes (21): firebase-admin, firebase-functions, dependencies, firebase-admin, firebase-functions, @google/generative-ai, devDependencies, typescript (+13 more)
 
 ### Community 13 - "Flow"
-Cohesion: 0.14
-Nodes (3): GroupDao, Flow, Group
+Cohesion: 0.10
+Nodes (7): AppSettingsDao, GroupDao, Flow, AppSettingsEntity, Capture, Group, GroupMemberRef
 
 ### Community 14 - "SocialEvent"
-Cohesion: 0.14
-Nodes (3): SocialEventDao, EventAttendeeRef, SocialEvent
+Cohesion: 0.10
+Nodes (7): SocialEventDao, EventAttendeeRef, SocialEvent, CompactEventRow(), EventCard(), NextSevenDaysSection(), ExampleRobolectricTest
 
 ### Community 15 - "RecordType"
 Cohesion: 0.12
@@ -174,17 +199,21 @@ Nodes (15): EncryptedRecordEnvelope, HybridRevision, Comparable, parse(), Record
 Cohesion: 0.12
 Nodes (16): Added, Added, Added, Added, Added, Added, Added, Changed (+8 more)
 
+### Community 19 - "CalendarAuthorizationState"
+Cohesion: 0.09
+Nodes (25): AnyObject, EKEvent, EKEventStore, EventKit, CalendarAuthorizationState, .canRead, .canWrite, denied (+17 more)
+
 ### Community 20 - "2. Fact & Observation Observation Tables"
 Cohesion: 0.14
 Nodes (13): 1. Dimensional / Entity Tables, 2. Fact & Observation Observation Tables, 3. Capture & Logging Cache, `captures` (Immutable history logs of user notes, transcriptions, or chat attachments), `event_attendees_join` (People linked to specific events), `group_members_join` (Relational cross-reference join mapping), `groups` (Circles of friends / communities), `memories` (Granular updates, facts, observations, prefered choices) (+5 more)
 
-### Community 21 - ".generateFallback"
-Cohesion: 0.27
-Nodes (8): ExtractedEvent, ExtractedMemory, ExtractedPerson, ExtractedRelationship, ExtractedReminder, ExtractionResult, GeminiClient, Bitmap
+### Community 21 - "AiAccessState"
+Cohesion: 0.07
+Nodes (22): ExtractionContract, ExtractedEvent, ExtractedMemory, ExtractedPerson, ExtractedRelationship, ExtractedReminder, ExtractionResult, GeminiClient (+14 more)
 
 ### Community 22 - "enum"
 Cohesion: 0.15
-Nodes (13): capture, event, eventAttendee, group, groupMembership, memory, person, relationship (+5 more)
+Nodes (13): capture, event, eventAttendee, group, groupMembership, memory, person, reminder (+5 more)
 
 ### Community 23 - "Component Guidelines"
 Cohesion: 0.17
@@ -202,13 +231,13 @@ Nodes (10): compilerOptions, esModuleInterop, module, moduleResolution, outDir, 
 Cohesion: 0.18
 Nodes (11): ciphertext, deleted, deviceId, id, keyVersion, nonce, recordType, revision (+3 more)
 
-### Community 28 - "index.js"
-Cohesion: 0.20
-Nodes (7): app_1, firestore_1, geminiApiKey, generative_ai_1, https_1, params_1, storage_1
+### Community 28 - "LocalEncryptedContentStore"
+Cohesion: 0.13
+Nodes (18): FileManager, LocalContentKeyManager, LocalContentKeyProviding, LocalContentPurpose, captureAnalysis, captureAttachment, captureBody, recordNote (+10 more)
 
-### Community 29 - "FirebaseAppDelegate"
-Cohesion: 0.20
-Nodes (8): FirebaseCore, FirebaseAppDelegate, Any, Bool, NSObject, UIApplication, UIApplicationDelegate, UIKit
+### Community 29 - ".application"
+Cohesion: 0.25
+Nodes (7): FirebaseAppDelegate, Any, Bool, URL, NSObject, UIApplication, UIApplicationDelegate
 
 ### Community 30 - "1. Color Palette Tokens"
 Cohesion: 0.22
@@ -219,12 +248,12 @@ Cohesion: 0.22
 Nodes (8): 1. Aesthetic Identity & Theme, 2. Low-Friction Capture Flow, 3. High Accessibility & Touch Ergonomics, 4. Chronological Heatmap Social Calendar UX, 5. Group & Circle Name Uniqueness Validation, Social Memory UX/UI Design, Theme Spec (Default: Light Mode):, Theme Toggling:
 
 ### Community 32 - "properties"
-Cohesion: 0.22
-Nodes (9): type, format, type, properties, deleted, id, updatedAtMs, minimum (+1 more)
+Cohesion: 0.17
+Nodes (12): type, minimum, type, properties, deleted, keyVersion, schemaVersion, updatedAtMs (+4 more)
 
 ### Community 33 - "Social Memory QA & Test Plan"
-Cohesion: 0.25
-Nodes (7): 1. Testing Frameworks Utilized, 2. Test Execution Details, 3. Manual QA Checklist (Calendar UI), Calendar View Layout and Heatmaps, Entity and Network Relational Consistency, Social Memory QA & Test Plan, Verified Test Outputs:
+Cohesion: 0.22
+Nodes (8): 1. Testing Frameworks Utilized, 2. Test Execution Details, 3. Manual QA Checklist (Calendar UI), 4. iOS validation after Xcode installation, Calendar View Layout and Heatmaps, Entity and Network Relational Consistency, Social Memory QA & Test Plan, Verified Test Outputs:
 
 ### Community 34 - "Social Memory UX/UI Guidelines"
 Cohesion: 0.25
@@ -236,23 +265,35 @@ Nodes (3): AesGcmCipher, Ciphertext, ByteArray
 
 ### Community 36 - "2. Security Safeguards"
 Cohesion: 0.29
-Nodes (6): 1. Ethical Alignment: "Memory Assistant" vs. "Friend Tracker", 2. Security Safeguards, A. Local-First Database and Encrypted Sync, B. Guarded AI Boundaries, C. Zero-Leak Sandbox Contacts Integration, Social Memory Security & Privacy Framework
+Nodes (6): 1. Ethical Alignment: "Memory Assistant" vs. "Friend Tracker", 2. Security Safeguards, A. Local-First Database and Device Encryption, B. Guarded AI Boundaries, C. Zero-Leak Sandbox Contacts Integration, Social Memory Security & Privacy Framework
 
-### Community 37 - "index.ts"
-Cohesion: 0.29
-Nodes (4): AIRequest, geminiApiKey, generateAIContent, resetEncryptedContent
+### Community 37 - "aiContract.ts"
+Cohesion: 0.07
+Nodes (49): AuthenticatedUser, AuthenticationRequiredError, requireAuthenticatedUser(), AIContractValidationError, AIExtractionResult, AIResponseSizeError, ConfidenceState, confidenceStates (+41 more)
+
+### Community 38 - "CaptureComposerView"
+Cohesion: 0.07
+Nodes (30): CaptureImporting, AttachmentStatusRow, .body, CaptureComposerView, .body, .canSave, .requiresAttachment, .sourceHelp (+22 more)
+
+### Community 39 - "Equatable"
+Cohesion: 0.08
+Nodes (27): Equatable, Error, AuthenticationProvider, apple, google, CalendarServiceError, calendarUnavailable, eventNotFound (+19 more)
 
 ### Community 40 - "record-envelope.schema.json"
 Cohesion: 0.33
 Nodes (5): additionalProperties, $id, $schema, title, type
 
+### Community 41 - "CaptureRecord"
+Cohesion: 0.13
+Nodes (19): CaptureRecord, Bool, optional(), PersonEditorView, Bool, MemoryEditorView, .body, .events (+11 more)
+
 ### Community 42 - "AI Extraction & Review Workflow"
 Cohesion: 0.40
 Nodes (4): 1. The Core Lifecycle, 2. Ingestion State Enforcements, 3. Strict Rules Against Auto-Saving, AI Extraction & Review Workflow
 
-### Community 43 - "Social Memory Architectures"
+### Community 43 - "Social Brain architecture"
 Cohesion: 0.40
-Nodes (4): 1. High-Level Architectural Pattern, 2. API Service Integration, Components, Social Memory Architectures
+Nodes (4): Client architecture, Cloud boundary, Social Brain architecture, Sync status
 
 ### Community 44 - "Calendar Heatmap UX"
 Cohesion: 0.40
@@ -260,7 +301,7 @@ Nodes (4): 1. Visual Heatmap Density Layout, 2. Interaction & Dynamic Filtering,
 
 ### Community 45 - "type"
 Cohesion: 0.40
-Nodes (5): integer, null, minimum, type, deletedAtMs
+Nodes (5): integer, minimum, type, null, deletedAtMs
 
 ### Community 46 - "ciphertext"
 Cohesion: 0.40
@@ -278,41 +319,160 @@ Nodes (3): content, fs, replacements
 Cohesion: 0.50
 Nodes (3): content, fs, replacements
 
+### Community 50 - "String"
+Cohesion: 0.21
+Nodes (7): CaptureAttachment, CaptureImportRequest, LocalCaptureService, Data, ModelContext, ModelContainer, String
+
 ### Community 51 - "revision"
 Cohesion: 0.50
 Nodes (4): revision, maxLength, minLength, type
+
+### Community 53 - "GroupRecord"
+Cohesion: 0.20
+Nodes (20): GroupRecord, .body, GroupDetailView, .body, .groupMemberships, GroupEditorView, PersonDetailView, .body (+12 more)
+
+### Community 56 - "SocialEventEditorView"
+Cohesion: 0.11
+Nodes (19): AttendeePickerView, .body, CalendarAccessCard, .body, CalendarAccessRationaleView, .body, .body, SocialEventDetailView (+11 more)
 
 ### Community 57 - "deviceId"
 Cohesion: 0.67
 Nodes (3): format, type, deviceId
 
-### Community 58 - "keyVersion"
-Cohesion: 0.67
-Nodes (3): minimum, type, keyVersion
+### Community 58 - "View"
+Cohesion: 0.13
+Nodes (20): CloudSyncUnavailableSection, .body, ConfidenceBadge, .body, .color, .label, DataManagementView, .body (+12 more)
 
-### Community 59 - "schemaVersion"
+### Community 59 - ".envelope"
+Cohesion: 0.17
+Nodes (11): HybridRevision, CloudSyncAvailability, FirestoreEnvelopeCodec, FirestoreEnvelopeStore, Any, EncryptedRecordEnvelope, Int, Int64 (+3 more)
+
+### Community 60 - "Social Brain"
+Cohesion: 0.18
+Nodes (8): Firebase deployment, Setup after Xcode installation, Social Brain for iOS, Validation, Android, Development notes, iOS, Social Brain
+
+### Community 61 - "PersonRecord"
+Cohesion: 0.13
+Nodes (17): PersonRecord, .members, .body, GroupMemberPickerView, .availablePeople, .body, .body, RelationshipDetailView (+9 more)
+
+### Community 67 - "Foundation"
+Cohesion: 0.14
+Nodes (9): Foundation, LocalCaptureAndResetTests, URL, LocalEncryptedContentStoreTests, URL, ServiceStateTests, SocialBrain, XCTest (+1 more)
+
+### Community 68 - "ReminderRecord"
+Cohesion: 0.19
+Nodes (19): ReminderRecord, EventSummaryRow, .body, HomeWorkspaceView, .body, .memories, .openReminders, .upcomingEvents (+11 more)
+
+### Community 69 - "properties"
+Cohesion: 0.12
+Nodes (17): coworker, friend, met_through, sibling, spouse, maxLength, minLength, type (+9 more)
+
+### Community 70 - "enum"
+Cohesion: 0.12
+Nodes (16): event_context, follow_up, general_note, life_update, preference, maxLength, minLength, type (+8 more)
+
+### Community 71 - "$defs"
+Cohesion: 0.12
+Nodes (16): needs_review, suggested, enum, type, $defs, confidenceState, evidence, memory (+8 more)
+
+### Community 72 - "AuthenticationStateStore.swift"
+Cohesion: 0.18
+Nodes (11): AuthenticationServices, Combine, CryptoKit, FirebaseAppCheck, FirebaseAuth, FirebaseCore, GoogleSignIn, FirebaseRuntime (+3 more)
+
+### Community 73 - "AuthenticationStateStore"
+Cohesion: 0.19
+Nodes (7): AuthStateDidChangeListenerHandle, AuthenticationStateStore, Data, Int, UIViewController, .accountActions, PersonNameComponents
+
+### Community 74 - "AppCheckState"
+Cohesion: 0.18
+Nodes (11): AppCheckState, checking, failed, .isReady, ready, unavailable, AppCheckStateStore, Bool (+3 more)
+
+### Community 75 - "CaptureKind"
+Cohesion: 0.15
+Nodes (13): CaptureKind, .displayName, email, photo, screenshot, sharedText, text, voice (+5 more)
+
+### Community 76 - "InMemoryContentKeyProvider"
+Cohesion: 0.18
+Nodes (7): LocalDataResetService, ModelContext, InMemoryContentKeyProvider, .hasKey, Bool, Data, Model
+
+### Community 77 - "required"
+Cohesion: 0.20
+Nodes (14): confidenceState, content, evidence, memoryType, name, personA, personB, relationshipType (+6 more)
+
+### Community 78 - "confidenceState"
+Cohesion: 0.15
+Nodes (14): $ref, person, reminder, $ref, $ref, additionalProperties, properties, type (+6 more)
+
+### Community 79 - "properties"
+Cohesion: 0.14
+Nodes (14): $ref, event, additionalProperties, properties, type, $ref, dateText, location (+6 more)
+
+### Community 80 - "AuthenticationAndAIStatusView"
+Cohesion: 0.18
+Nodes (9): ProtectedFeatureAvailability, available, unavailable, .body, AuthenticationAndAIStatusView, .aiAvailability, .aiAvailabilityRow, .authenticationStatus (+1 more)
+
+### Community 81 - "ai-contract.test.js"
+Cohesion: 0.20
+Nodes (8): {
+  AI_RATE_LIMIT_MAX_REQUESTS,
+  AI_RATE_LIMIT_WINDOW_MS,
+  evaluateAIRequestRateLimit,
+}, {
+  AIContractValidationError,
+  AIResponseSizeError,
+  MAX_AI_RESPONSE_BYTES,
+  ensureAIResponseWithinLimit,
+  isAIExtractionResult,
+  parseAIExtractionOutput,
+}, { AIRequestValidationError, parseAIRequest }, assert, { AuthenticationRequiredError, requireAuthenticatedUser }, fs, path, test
+
+### Community 82 - "RecallWorkspaceView"
+Cohesion: 0.36
+Nodes (8): RecallWorkspaceView, .events, .memories, .normalizedQuery, .people, .reminders, Bool, String
+
+### Community 83 - ".baseQuery"
+Cohesion: 0.54
+Nodes (4): keychain, KeychainStore, Any, String
+
+### Community 84 - "optionalText"
+Cohesion: 0.29
+Nodes (8): string, optionalText, null, maxLength, type, resolvedDate, format, type
+
+### Community 85 - "AuthenticationState"
+Cohesion: 0.29
+Nodes (7): AuthenticationState, failed, signedIn, signedOut, signingIn, unavailable, .userID
+
+### Community 86 - "parseTextToBlocks"
+Cohesion: 0.60
+Nodes (6): Bullet, ChatBlock, Heading, Numbered, Paragraph, parseTextToBlocks()
+
+### Community 88 - "name"
+Cohesion: 0.50
+Nodes (4): maxLength, minLength, type, name
+
+### Community 89 - "id"
 Cohesion: 0.67
-Nodes (3): schemaVersion, const, type
+Nodes (3): format, type, id
 
 ## Knowledge Gaps
-- **262 isolated node(s):** `fs`, `content`, `replacements`, `fs`, `content` (+257 more)
+- **457 isolated node(s):** `fs`, `content`, `replacements`, `fs`, `content` (+452 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **15 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `AppViewModel` connect `AppViewModel` to `MainAppScreens.kt`, `AppDatabase`, `Entities.kt`, `AppRepository`, `ConfidenceState`, `AppScreen`, `.prepopulateDataIfEmpty`, `Flow`, `SocialEvent`, `Reminder`, `Memory`, `Person`, `.saveConfirmedSuggestions`, `Relationship`?**
-  _High betweenness centrality (0.071) - this node is a cross-community bridge._
-- **Why does `AppRepository` connect `AppRepository` to `AppDatabase`, `Entities.kt`, `AppViewModel`, `Flow`, `SocialEvent`, `Reminder`, `Memory`, `Person`, `Relationship`?**
-  _High betweenness centrality (0.026) - this node is a cross-community bridge._
-- **Why does `Person` connect `Person` to `MainAppScreens.kt`, `.prepopulateDataIfEmpty`, `AppRepository`, `Entities.kt`, `AppViewModel`, `ExampleRobolectricTest`, `Flow`, `SocialEvent`, `.generateFallback`, `.saveConfirmedSuggestions`?**
-  _High betweenness centrality (0.024) - this node is a cross-community bridge._
+- **Why does `AppViewModel` connect `AppViewModel` to `MainAppScreens.kt`, `AppRepository`, `ConfidenceState`, `AppScreen`, `Flow`, `SocialEvent`, `Reminder`, `Memory`, `AiAccessState`, `Relationship`?**
+  _High betweenness centrality (0.030) - this node is a cross-community bridge._
+- **Why does `Foundation` connect `Foundation` to `RecordType`, `SocialEventRecord`, `AuthenticationStateStore.swift`, `String`, `CalendarAuthorizationState`, `.envelope`, `LocalEncryptedContentStore`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **Why does `AppRepository` connect `AppRepository` to `AppViewModel`, `Flow`, `SocialEvent`, `Reminder`, `Memory`, `Relationship`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **Are the 9 inferred relationships involving `PersonRecord` (e.g. with `.members` and `.body`) actually correct?**
+  _`PersonRecord` has 9 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `fs`, `content`, `replacements` to the rest of the system?**
-  _262 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `MainAppScreens.kt` be split into smaller, more focused modules?**
-  _Cohesion score 0.12307692307692308 - nodes in this community are weakly interconnected._
+  _457 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `RecordType` be split into smaller, more focused modules?**
-  _Cohesion score 0.08205128205128205 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05858585858585859 - nodes in this community are weakly interconnected._
 - **Should `ai-extraction.schema.json` be split into smaller, more focused modules?**
-  _Cohesion score 0.05128205128205128 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05832147937411095 - nodes in this community are weakly interconnected._

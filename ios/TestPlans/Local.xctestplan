@@ -1,0 +1,40 @@
+{
+  "configurations" : [
+    {
+      "id" : "B4FEA9A2-7A26-4199-9167-1D4C4BEF04F1",
+      "name" : "Local",
+      "options" : {
+        "environmentVariableEntries" : [
+          {
+            "key" : "SOCIAL_BRAIN_RUNTIME",
+            "value" : "local",
+            "isEnabled" : true
+          }
+        ],
+        "testTimeoutsEnabled" : true
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : true
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:SocialBrain.xcodeproj",
+        "identifier" : "987D0EC5A07FF812AB1389C3",
+        "name" : "SocialBrainTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:SocialBrain.xcodeproj",
+        "identifier" : "28A74FECBA111CA2614C4A40",
+        "name" : "SocialBrainUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

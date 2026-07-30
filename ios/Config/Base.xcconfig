@@ -1,0 +1,17 @@
+// Settings shared by every build configuration and target.
+IPHONEOS_DEPLOYMENT_TARGET = 17.0
+SWIFT_VERSION = 5.0
+SWIFT_STRICT_CONCURRENCY = complete
+CLANG_WARN_DOCUMENTATION_COMMENTS = YES
+ENABLE_USER_SCRIPT_SANDBOXING = YES
+
+MARKETING_VERSION = 1.0
+CURRENT_PROJECT_VERSION = 1
+
+// Non-secret defaults. Firebase.local.xcconfig may override the Functions
+// region, while Developer.local.xcconfig can supply developer-specific signing.
+FUNCTIONS_REGION = us-central1
+SOCIAL_BRAIN_DEVELOPMENT_TEAM =
+FIREBASE_PLIST_PATH =
+
+#include? "Developer.local.xcconfig"

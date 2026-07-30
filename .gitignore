@@ -18,11 +18,16 @@ firebase/functions/node_modules/
 ios/.build/
 ios/DerivedData/
 ios/.swiftpm/
+ios/.xcodegen/
 ios/**/*.xcuserstate
 ios/**/*.xcuserdata/
 ios/**/*.xcodeproj/
+ios/SocialBrain.xcodeproj/
 ios/GoogleService-Info.plist
 ios/SocialBrain/Resources/GoogleService-Info.plist
+ios/Config/Firebase/GoogleService-Info.plist
+ios/Config/Firebase.local.xcconfig
+ios/Config/Developer.local.xcconfig
 
 # Operating-system files
 .DS_Store

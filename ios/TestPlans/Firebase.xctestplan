@@ -1,0 +1,40 @@
+{
+  "configurations" : [
+    {
+      "id" : "D9E6A7C4-1D57-44D7-9741-BA7ACB856AA2",
+      "name" : "Firebase",
+      "options" : {
+        "environmentVariableEntries" : [
+          {
+            "key" : "SOCIAL_BRAIN_RUNTIME",
+            "value" : "firebase",
+            "isEnabled" : true
+          }
+        ],
+        "testTimeoutsEnabled" : true
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : true
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:SocialBrain.xcodeproj",
+        "identifier" : "987D0EC5A07FF812AB1389C3",
+        "name" : "SocialBrainTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:SocialBrain.xcodeproj",
+        "identifier" : "28A74FECBA111CA2614C4A40",
+        "name" : "SocialBrainUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

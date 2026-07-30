@@ -7,6 +7,8 @@ final class ContentCipherTests: XCTestCase {
         let metadata = Data("person:record-1:1".utf8)
         let value = Data("A private memory".utf8)
         let sealed = try ContentCipher.seal(value, key: key, authenticatedMetadata: metadata)
+        XCTAssertEqual(sealed.nonce.count, ContentCipher.nonceByteCount)
+        XCTAssertGreaterThanOrEqual(sealed.ciphertext.count, ContentCipher.authenticationTagByteCount)
         XCTAssertEqual(try ContentCipher.open(nonce: sealed.nonce, ciphertext: sealed.ciphertext, key: key, authenticatedMetadata: metadata), value)
     }
 

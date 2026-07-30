@@ -1,0 +1,4 @@
+#include "Release.xcconfig"
+#include "Firebase.xcconfig"
+
+APP_CHECK_PROVIDER = appattest

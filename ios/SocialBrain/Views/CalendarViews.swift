@@ -4,11 +4,20 @@ import SwiftUI
 @MainActor
 struct CalendarWorkspaceView: View {
     @Query(sort: \SocialEventRecord.startTime) private var allEvents: [SocialEventRecord]
-    private let calendarService = EventKitCalendarService()
+    private let calendarService: any CalendarService
+    private let settingsOpener: any ApplicationSettingsOpening
     @State private var showingEditor = false
     @State private var showingAccessInfo = false
     @State private var showingDeviceImport = false
     @State private var calendarState: CalendarAuthorizationState = .unavailable
+
+    init(
+        calendarService: any CalendarService = EventKitCalendarService(),
+        settingsOpener: any ApplicationSettingsOpening = SystemApplicationSettingsOpener()
+    ) {
+        self.calendarService = calendarService
+        self.settingsOpener = settingsOpener
+    }
 
     private var events: [SocialEventRecord] { allEvents.filter(\.isVisibleInDefaultLists) }
 
@@ -19,6 +28,8 @@ struct CalendarWorkspaceView: View {
                     state: calendarState,
                     showingAccessInfo: $showingAccessInfo,
                     requestAccess: requestCalendarAccess,
+                    requestWriteOnlyAccess: requestCalendarWriteOnlyAccess,
+                    openSettings: settingsOpener.openApplicationSettings,
                     importEvents: { showingDeviceImport = true }
                 )
 
@@ -32,7 +43,11 @@ struct CalendarWorkspaceView: View {
                     }
                     ForEach(events) { event in
                         NavigationLink {
-                            SocialEventDetailView(event: event)
+                            SocialEventDetailView(
+                                event: event,
+                                calendarService: calendarService,
+                                settingsOpener: settingsOpener
+                            )
                         } label: {
                             EventSummaryRow(event: event)
                         }
@@ -63,12 +78,20 @@ struct CalendarWorkspaceView: View {
             calendarState = await calendarService.requestFullAccess()
         }
     }
+
+    private func requestCalendarWriteOnlyAccess() {
+        Task {
+            calendarState = await calendarService.requestWriteOnlyAccess()
+        }
+    }
 }
 
 private struct CalendarAccessCard: View {
     let state: CalendarAuthorizationState
     @Binding var showingAccessInfo: Bool
     let requestAccess: () -> Void
+    let requestWriteOnlyAccess: () -> Void
+    let openSettings: () -> Void
     let importEvents: () -> Void
 
     var body: some View {
@@ -82,11 +105,22 @@ private struct CalendarAccessCard: View {
                     .foregroundStyle(.secondary)
             case .notDetermined:
                 Label("Calendar permission needed", systemImage: "calendar.badge.clock")
-                Button("Allow Calendar Access", action: requestAccess)
-            case .denied, .restricted:
+                Button("Allow Calendar Import and Export", action: requestAccess)
+                Button("Allow Export Only", action: requestWriteOnlyAccess)
+                Text("Import requires full access. Export-only access lets you add a confirmed event without reading calendar events.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            case .denied:
                 Label("Calendar access was denied", systemImage: "calendar.badge.exclamationmark")
                     .foregroundStyle(.orange)
                 Text("Enable calendar access in iOS Settings to read or write selected events.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                Button("Open Settings", action: openSettings)
+            case .restricted:
+                Label("Calendar access is restricted", systemImage: "calendar.badge.exclamationmark")
+                    .foregroundStyle(.secondary)
+                Text("This device currently prevents calendar access. Local events remain available.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             case .fullAccess:
@@ -99,6 +133,7 @@ private struct CalendarAccessCard: View {
                 Text("You can export a confirmed event, but iOS has not granted read access for import.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+                Button("Enable Event Import", action: requestAccess)
             }
 
             Button("How calendar access works") {
@@ -114,10 +149,14 @@ private struct DeviceCalendarImportView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Query(sort: \SocialEventRecord.updatedAt, order: .reverse) private var allEvents: [SocialEventRecord]
     @State private var deviceEvents: [DeviceCalendarEvent] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
-    @State private var eventPendingDeletion: DeviceCalendarEvent?
+
+    private var importableDeviceEvents: [DeviceCalendarEvent] {
+        deviceEvents.filter { $0.socialBrainOwnerID == nil }
+    }
 
     var body: some View {
         NavigationStack {
@@ -129,10 +168,14 @@ private struct DeviceCalendarImportView: View {
                         ProgressView()
                         Text("Loading upcoming events…")
                     }
-                } else if deviceEvents.isEmpty {
-                    ContentUnavailableView("No upcoming device events", systemImage: "calendar")
+                } else if importableDeviceEvents.isEmpty {
+                    ContentUnavailableView(
+                        "No new upcoming device events",
+                        systemImage: "calendar",
+                        description: Text("Events previously exported by Social Brain are not imported again.")
+                    )
                 } else {
-                    ForEach(deviceEvents) { deviceEvent in
+                    ForEach(importableDeviceEvents) { deviceEvent in
                         Button {
                             importEvent(deviceEvent)
                         } label: {
@@ -141,13 +184,14 @@ private struct DeviceCalendarImportView: View {
                                 Text(deviceEvent.startDate, format: .dateTime.month(.abbreviated).day().hour().minute())
                                     .font(.footnote)
                                 .foregroundStyle(.secondary)
+                                if importedRecord(for: deviceEvent) != nil {
+                                    Text("Already imported")
+                                        .font(.caption)
+                                        .foregroundStyle(.orange)
+                                }
                             }
                         }
-                        .swipeActions {
-                            Button("Delete", role: .destructive) {
-                                eventPendingDeletion = deviceEvent
-                            }
-                        }
+                        .disabled(importedRecord(for: deviceEvent) != nil)
                     }
                 }
             }
@@ -156,19 +200,6 @@ private struct DeviceCalendarImportView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } }
             }
             .task { loadEvents() }
-            .confirmationDialog(
-                "Delete this device-calendar event?",
-                isPresented: Binding(
-                    get: { eventPendingDeletion != nil },
-                    set: { if !$0 { eventPendingDeletion = nil } }
-                ),
-                titleVisibility: .visible
-            ) {
-                Button("Delete from Device Calendar", role: .destructive, action: deletePendingEvent)
-                Button("Cancel", role: .cancel) { eventPendingDeletion = nil }
-            } message: {
-                Text("This removes the selected event from the device calendar. It does not affect other local Social Brain records.")
-            }
         }
     }
 
@@ -184,25 +215,31 @@ private struct DeviceCalendarImportView: View {
     }
 
     private func importEvent(_ deviceEvent: DeviceCalendarEvent) {
+        guard importedRecord(for: deviceEvent) == nil else { return }
         let record = SocialEventRecord(title: deviceEvent.title, startTime: deviceEvent.startDate)
         record.endTime = deviceEvent.endDate
         record.location = deviceEvent.location
         record.evidenceText = deviceEvent.notes
         record.confidenceState = "confirmed"
+        record.externalEventIdentifier = deviceEvent.id
+        record.externalCalendarIdentifier = deviceEvent.calendarIdentifier
+        record.calendarLinkMode = CalendarLinkMode.imported.rawValue
         modelContext.insert(record)
-        saveLocalChanges(modelContext)
+        guard saveLocalChanges(modelContext) else {
+            modelContext.rollback()
+            errorMessage = "The selected event could not be saved locally."
+            return
+        }
         dismiss()
     }
 
-    private func deletePendingEvent() {
-        guard let event = eventPendingDeletion else { return }
-        do {
-            try calendarService.deleteEvent(identifier: event.id)
-            deviceEvents.removeAll { $0.id == event.id }
-        } catch {
-            errorMessage = "This device-calendar event could not be deleted."
+    private func importedRecord(for deviceEvent: DeviceCalendarEvent) -> SocialEventRecord? {
+        allEvents.first {
+            $0.isVisibleInDefaultLists &&
+            $0.externalCalendarLinkMode == .imported &&
+            $0.externalEventIdentifier == deviceEvent.id &&
+            $0.externalCalendarIdentifier == deviceEvent.calendarIdentifier
         }
-        eventPendingDeletion = nil
     }
 }
 
@@ -216,7 +253,7 @@ private struct CalendarAccessRationaleView: View {
                     Text("When enabled, importing reads only the device-calendar events you select for review. It does not automatically copy your whole calendar into Social Brain.")
                 }
                 Section("Write") {
-                    Text("When enabled, exporting writes only a confirmed Social Brain event to the calendar you choose. It never changes an event without your action.")
+                    Text("When enabled, exporting writes only a confirmed Social Brain event to your device calendar. It never changes an event without your action, and it only removes exports marked as Social Brain events.")
                 }
                 Section("If access is denied") {
                     Text("Local events continue to work. You can grant access later in iOS Settings.")
@@ -233,20 +270,49 @@ private struct CalendarAccessRationaleView: View {
 @MainActor
 struct SocialEventDetailView: View {
     let event: SocialEventRecord
+    private let calendarServiceOverride: (any CalendarService)?
+    private let settingsOpener: any ApplicationSettingsOpening
 
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var environment: AppEnvironment
     @Query(sort: \GroupRecord.name) private var groups: [GroupRecord]
     @Query(sort: \PersonRecord.fullName) private var people: [PersonRecord]
     @Query private var attendeeLinks: [EventAttendeeRecord]
     @State private var showingEditor = false
     @State private var showingCalendarRationale = false
+    @State private var showingCalendarDeletionConfirmation = false
     @State private var calendarExportMessage: String?
+
+    init(
+        event: SocialEventRecord,
+        calendarService: (any CalendarService)? = nil,
+        settingsOpener: any ApplicationSettingsOpening = SystemApplicationSettingsOpener()
+    ) {
+        self.event = event
+        calendarServiceOverride = calendarService
+        self.settingsOpener = settingsOpener
+    }
+
+    /// Calendar actions reached from Home, Recall, and evidence links share
+    /// the same root service as the Calendar tab. A direct override keeps
+    /// preview and focused UI-test construction deterministic.
+    private var calendarService: any CalendarService {
+        calendarServiceOverride ?? environment.calendarService
+    }
 
     private var attendees: [PersonRecord] {
         let personIDs = Set(attendeeLinks.filter {
             $0.eventID == event.id && $0.isVisibleInDefaultLists
         }.map(\.personID))
         return people.filter { personIDs.contains($0.id) && $0.isVisibleInDefaultLists }
+    }
+
+    private var exportedCalendarLink: (eventIdentifier: String, calendarIdentifier: String)? {
+        guard event.externalCalendarLinkMode == .exported,
+              let eventIdentifier = event.externalEventIdentifier,
+              let calendarIdentifier = event.externalCalendarIdentifier
+        else { return nil }
+        return (eventIdentifier, calendarIdentifier)
     }
 
     var body: some View {
@@ -287,11 +353,27 @@ struct SocialEventDetailView: View {
             }
 
             Section("Device Calendar") {
-                if event.startTime != nil, event.endTime != nil {
-                    Button("Add to Device Calendar") { exportToCalendar() }
+                if event.externalCalendarLinkMode == .imported {
+                    Label("Imported from Device Calendar", systemImage: "calendar.badge.checkmark")
+                        .foregroundStyle(.secondary)
+                    Text("This local event already represents a device-calendar event. It is not exported again as a second event.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                } else if event.startTime != nil, event.endTime != nil {
+                    Button(exportedCalendarLink == nil ? "Add to Device Calendar" : "Update Device Calendar Event") {
+                        exportToCalendar()
+                    }
+                    if exportedCalendarLink != nil {
+                        Button("Remove Social Brain Export", role: .destructive) {
+                            showingCalendarDeletionConfirmation = true
+                        }
+                    }
                 } else {
                     Label("Add a start and end time to export", systemImage: "calendar.badge.exclamationmark")
                         .foregroundStyle(.secondary)
+                }
+                if calendarService.authorizationState == .denied {
+                    Button("Open Calendar Settings", action: settingsOpener.openApplicationSettings)
                 }
                 Button("About calendar export") { showingCalendarRationale = true }
                 Text(calendarExportMessage ?? "Export only happens when you tap Add to Device Calendar. This local event is never shared automatically.")
@@ -310,19 +392,13 @@ struct SocialEventDetailView: View {
                 RecordLifecycleActions(
                     isArchived: event.archivedAt != nil,
                     archive: {
-                        event.archivedAt = .now
-                        event.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().archive(event, in: modelContext)
                     },
                     restore: {
-                        event.archivedAt = nil
-                        event.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().restore(event, in: modelContext)
                     },
                     delete: {
-                        event.deletedAt = .now
-                        event.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().softDelete(event: event, in: modelContext)
                     }
                 )
             }
@@ -333,26 +409,83 @@ struct SocialEventDetailView: View {
         .sheet(isPresented: $showingCalendarRationale) {
             CalendarAccessRationaleView()
         }
+        .confirmationDialog(
+            "Remove the Social Brain export?",
+            isPresented: $showingCalendarDeletionConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Remove from Device Calendar", role: .destructive, action: removeCalendarExport)
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Only the device-calendar event created and marked by Social Brain will be removed. Your local event stays here.")
+        }
     }
 
     private func exportToCalendar() {
         guard let start = event.startTime, let end = event.endTime else { return }
-        let service = EventKitCalendarService()
-        guard service.authorizationState.canWrite else {
-            calendarExportMessage = "Grant Calendar write access before exporting this event."
+        guard calendarService.authorizationState != .notDetermined else {
+            Task {
+                let state = await calendarService.requestWriteOnlyAccess()
+                guard state.canWrite else {
+                    calendarExportMessage = "Calendar write access is needed before exporting this event."
+                    return
+                }
+                saveCalendarExport(start: start, end: end)
+            }
             return
         }
+        guard calendarService.authorizationState.canWrite else {
+            calendarExportMessage = "Calendar write access is needed before exporting this event."
+            return
+        }
+        saveCalendarExport(start: start, end: end)
+    }
+
+    private func saveCalendarExport(start: Date, end: Date) {
         do {
-            _ = try service.save(CalendarEventDraft(
+            let deviceEvent = try calendarService.save(CalendarEventDraft(
+                eventIdentifier: exportedCalendarLink?.eventIdentifier,
                 title: event.title,
                 startDate: start,
                 endDate: end,
                 location: event.location,
-                notes: event.evidenceText
+                notes: event.evidenceText,
+                calendarIdentifier: exportedCalendarLink?.calendarIdentifier,
+                socialBrainOwnerID: event.id
             ))
-            calendarExportMessage = "Added to your device calendar."
+            event.externalEventIdentifier = deviceEvent.id
+            event.externalCalendarIdentifier = deviceEvent.calendarIdentifier
+            event.calendarLinkMode = CalendarLinkMode.exported.rawValue
+            event.markUpdated()
+            guard saveLocalChanges(modelContext) else {
+                calendarExportMessage = "The device event was saved, but Social Brain could not store its link. Do not export it again until local storage is available."
+                return
+            }
+            calendarExportMessage = "Device calendar event saved."
         } catch {
-            calendarExportMessage = "This event could not be added to the selected device calendar."
+            calendarExportMessage = "This event could not be saved to the device calendar."
+        }
+    }
+
+    private func removeCalendarExport() {
+        guard let link = exportedCalendarLink else { return }
+        do {
+            try calendarService.deleteSocialBrainExportedEvent(
+                identifier: link.eventIdentifier,
+                calendarIdentifier: link.calendarIdentifier,
+                ownerID: event.id
+            )
+            event.externalEventIdentifier = nil
+            event.externalCalendarIdentifier = nil
+            event.calendarLinkMode = nil
+            event.markUpdated()
+            guard saveLocalChanges(modelContext) else {
+                calendarExportMessage = "The device export was removed, but its local link could not be cleared."
+                return
+            }
+            calendarExportMessage = "Social Brain export removed from the device calendar."
+        } catch {
+            calendarExportMessage = "Only a matching Social Brain export can be removed. This device-calendar event was left unchanged."
         }
     }
 }
@@ -471,10 +604,13 @@ struct SocialEventEditorView: View {
         updateAttendees(for: record)
 
         if let sourceCapture {
-            sourceCapture.processed = true
+            // Creating one manual event is a review action, not completion:
+            // other suggestions can still be pending for this capture.
+            sourceCapture.reviewState = CaptureReviewState.inProgress.rawValue
+            sourceCapture.processed = false
             sourceCapture.markUpdated()
         }
-        saveLocalChanges(modelContext)
+        guard saveLocalChanges(modelContext) else { return }
         dismiss()
     }
 

@@ -1,0 +1,7 @@
+// Firebase builds source the ignored plist outside the app resources. The
+// Firebase-only target script embeds it after Local resources are excluded.
+SOCIAL_BRAIN_RUNTIME = firebase
+SOCIAL_BRAIN_REQUIRE_FIREBASE_CONFIG = YES
+GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.REPLACE_WITH_REAL_REVERSED_CLIENT_ID
+FIREBASE_PLIST_PATH = $(SRCROOT)/Config/Firebase/GoogleService-Info.plist
+#include? "Firebase.local.xcconfig"

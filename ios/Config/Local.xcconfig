@@ -1,0 +1,8 @@
+// Local builds intentionally launch without Firebase credentials.
+SOCIAL_BRAIN_RUNTIME = local
+SOCIAL_BRAIN_REQUIRE_FIREBASE_CONFIG = NO
+GOOGLE_REVERSED_CLIENT_ID = com.aistudio.socialbrain.local
+APP_CHECK_PROVIDER = disabled
+// A tracked placeholder keeps the Firebase build-phase input well-formed; the
+// Local configuration exits before the script reads or embeds this file.
+FIREBASE_PLIST_PATH = $(SRCROOT)/SocialBrain/Resources/GoogleService-Info.plist.example

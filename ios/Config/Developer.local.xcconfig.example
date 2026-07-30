@@ -1,0 +1,3 @@
+// Copy to Developer.local.xcconfig (ignored by Git) for machine-specific
+// signing settings. This applies to both Local and Firebase configurations.
+SOCIAL_BRAIN_DEVELOPMENT_TEAM = REPLACE_WITH_APPLE_DEVELOPER_TEAM_ID

@@ -1,10 +1,18 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { initializeApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { requireAuthenticatedUser, AuthenticationRequiredError } from "./aiAuth.js";
+import {
+  ACCOUNT_DELETION_CALLABLE_OPTIONS,
+  deleteAccountDataForUser,
+  mapAccountDeletionError,
+  requireRecentAuthenticatedUser,
+  assertEmptyAccountDeletionPayload,
+} from "./accountDeletion.js";
 import {
   AIContractValidationError,
   AIResponseSizeError,
@@ -17,6 +25,7 @@ import {
   evaluateAIRequestRateLimit,
   type AIRequestRateLimitState,
 } from "./aiRateLimit.js";
+import { getGeminiModel } from "./geminiConfig.js";
 
 initializeApp();
 
@@ -87,7 +96,7 @@ export const generateAIContent = onCall(
       await takeAIRequestRateLimitSlot(userId);
       const client = new GoogleGenerativeAI(geminiApiKey.value());
       const model = client.getGenerativeModel({
-        model: process.env.GEMINI_MODEL ?? "gemini-2.0-flash",
+        model: getGeminiModel(),
         systemInstruction: input.systemInstruction,
         generationConfig: { responseMimeType: input.responseMimeType },
       });
@@ -107,25 +116,31 @@ export const generateAIContent = onCall(
   },
 );
 
-/** Explicit clean-slate action for an account with a forgotten sync passphrase. */
-export const resetEncryptedContent = onCall(
-  { enforceAppCheck: true, timeoutSeconds: 540, memory: "1GiB" },
+/** Permanently removes legacy server data and the authenticated Firebase user. */
+export const deleteAccountData = onCall(
+  ACCOUNT_DELETION_CALLABLE_OPTIONS,
   async (request) => {
     let userId: string;
     try {
-      userId = requireAuthenticatedUser(request.auth).uid;
+      userId = requireRecentAuthenticatedUser(request.auth).uid;
+      assertEmptyAccountDeletionPayload(request.data);
     } catch (error) {
-      return mapRequestError(error);
+      return mapAccountDeletionError(error);
     }
 
     try {
       const db = getFirestore();
-      await db.recursiveDelete(db.collection("users").doc(userId));
-      await getStorage().bucket().deleteFiles({ prefix: `users/${userId}/` });
-      return { reset: true };
-    } catch {
-      // Do not include account, storage, or content details in an API error.
-      throw new HttpsError("unavailable", "Content reset is temporarily unavailable.");
+      await deleteAccountDataForUser(userId, {
+        deleteLegacyFirestoreData: (id) => db.recursiveDelete(db.collection("users").doc(id)),
+        deleteLegacyStorageData: (id) => getStorage().bucket().deleteFiles({ prefix: `users/${id}/` }),
+        deleteRateLimitData: async (id) => {
+          await db.collection("internalAiRateLimits").doc(id).delete();
+        },
+        deleteAuthUser: (id) => getAuth().deleteUser(id),
+      });
+      return { deleted: true };
+    } catch (error) {
+      return mapAccountDeletionError(error);
     }
   },
 );

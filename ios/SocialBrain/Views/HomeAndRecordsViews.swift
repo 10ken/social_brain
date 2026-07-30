@@ -243,19 +243,13 @@ struct MemoryDetailView: View {
                 RecordLifecycleActions(
                     isArchived: memory.archivedAt != nil,
                     archive: {
-                        memory.archivedAt = .now
-                        memory.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().archive(memory, in: modelContext)
                     },
                     restore: {
-                        memory.archivedAt = nil
-                        memory.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().restore(memory, in: modelContext)
                     },
                     delete: {
-                        memory.deletedAt = .now
-                        memory.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().softDelete(memory, in: modelContext)
                     }
                 )
             }
@@ -353,10 +347,11 @@ struct MemoryEditorView: View {
         record.markUpdated()
         if memory == nil { modelContext.insert(record) }
         if let sourceCapture {
-            sourceCapture.processed = true
+            sourceCapture.reviewState = CaptureReviewState.inProgress.rawValue
+            sourceCapture.processed = false
             sourceCapture.markUpdated()
         }
-        saveLocalChanges(modelContext)
+        guard saveLocalChanges(modelContext) else { return }
         dismiss()
     }
 }
@@ -384,11 +379,12 @@ struct RemindersListView: View {
                     ReminderSummaryRow(reminder: reminder)
                 }
                 .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                    Button(reminder.completed ? "Reopen" : "Complete", tint: reminder.completed ? .orange : .green) {
+                    Button(reminder.completed ? "Reopen" : "Complete") {
                         reminder.completed.toggle()
                         reminder.markUpdated()
                         saveLocalChanges(modelContext)
                     }
+                    .tint(reminder.completed ? .orange : .green)
                 }
             }
         }
@@ -452,19 +448,13 @@ struct ReminderDetailView: View {
                 RecordLifecycleActions(
                     isArchived: reminder.archivedAt != nil,
                     archive: {
-                        reminder.archivedAt = .now
-                        reminder.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().archive(reminder, in: modelContext)
                     },
                     restore: {
-                        reminder.archivedAt = nil
-                        reminder.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().restore(reminder, in: modelContext)
                     },
                     delete: {
-                        reminder.deletedAt = .now
-                        reminder.markUpdated()
-                        saveLocalChanges(modelContext)
+                        _ = RecordLifecycleService().softDelete(reminder, in: modelContext)
                     }
                 )
             }
@@ -554,10 +544,11 @@ struct ReminderEditorView: View {
         record.markUpdated()
         if reminder == nil { modelContext.insert(record) }
         if let sourceCapture {
-            sourceCapture.processed = true
+            sourceCapture.reviewState = CaptureReviewState.inProgress.rawValue
+            sourceCapture.processed = false
             sourceCapture.markUpdated()
         }
-        saveLocalChanges(modelContext)
+        guard saveLocalChanges(modelContext) else { return }
         dismiss()
     }
 }

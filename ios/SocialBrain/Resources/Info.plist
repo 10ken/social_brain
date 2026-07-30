@@ -6,10 +6,27 @@
   <string>Social Brain</string>
   <key>CFBundleIdentifier</key>
   <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+  <key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>CFBundleURLName</key>
+      <string>Google Sign-In</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
+      </array>
+    </dict>
+  </array>
   <key>CFBundleShortVersionString</key>
   <string>1.0</string>
   <key>CFBundleVersion</key>
   <string>1</string>
+  <key>FUNCTIONS_REGION</key>
+  <string>$(FUNCTIONS_REGION)</string>
+  <key>APP_CHECK_PROVIDER</key>
+  <string>$(APP_CHECK_PROVIDER)</string>
   <key>UIApplicationSupportsIndirectInputEvents</key>
   <true/>
   <key>NSContactsUsageDescription</key>
@@ -22,5 +39,27 @@
   <string>Social Brain needs microphone access to record a voice note you explicitly start.</string>
   <key>NSCalendarsFullAccessUsageDescription</key>
   <string>Social Brain reads and writes only calendars and events you explicitly connect.</string>
+  <key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+  <string>Social Brain adds or updates only calendar events you explicitly export.</string>
+  <key>UILaunchScreen</key>
+  <dict>
+    <key>UIColorName</key>
+    <string>LaunchBackground</string>
+  </dict>
+  <key>UIRequiresFullScreen</key>
+  <false/>
+  <key>UISupportedInterfaceOrientations</key>
+  <array>
+    <string>UIInterfaceOrientationPortrait</string>
+    <string>UIInterfaceOrientationLandscapeLeft</string>
+    <string>UIInterfaceOrientationLandscapeRight</string>
+  </array>
+  <key>UISupportedInterfaceOrientations~ipad</key>
+  <array>
+    <string>UIInterfaceOrientationPortrait</string>
+    <string>UIInterfaceOrientationPortraitUpsideDown</string>
+    <string>UIInterfaceOrientationLandscapeLeft</string>
+    <string>UIInterfaceOrientationLandscapeRight</string>
+  </array>
 </dict>
 </plist>

@@ -4,6 +4,7 @@ import Security
 
 enum ContentCipherError: Error {
     case invalidKeyLength
+    case invalidNonceLength
     case invalidCombinedCiphertext
     case randomGenerationFailed(OSStatus)
     case keychain(OSStatus)
@@ -11,6 +12,11 @@ enum ContentCipherError: Error {
 
 enum ContentCipher {
     static let keyByteCount = 32
+    /// AES-GCM always uses a 96-bit nonce. Keeping this explicit avoids relying
+    /// on an SDK-only convenience constant and documents the on-disk envelope
+    /// format shared with previously written content.
+    static let nonceByteCount = 12
+    static let authenticationTagByteCount = 16
 
     static func generateKey() throws -> Data {
         var bytes = Data(count: keyByteCount)
@@ -23,14 +29,34 @@ enum ContentCipher {
 
     static func seal(_ plaintext: Data, key: Data, authenticatedMetadata: Data) throws -> (nonce: Data, ciphertext: Data) {
         guard key.count == keyByteCount else { throw ContentCipherError.invalidKeyLength }
-        let sealed = try AES.GCM.seal(plaintext, using: SymmetricKey(data: key), authenticating: authenticatedMetadata)
-        guard let combined = sealed.combined, combined.count > AES.GCM.nonceByteCount else { throw ContentCipherError.invalidCombinedCiphertext }
-        return (Data(combined.prefix(AES.GCM.nonceByteCount)), Data(combined.dropFirst(AES.GCM.nonceByteCount)))
+        let nonce = AES.GCM.Nonce()
+        let sealed = try AES.GCM.seal(
+            plaintext,
+            using: SymmetricKey(data: key),
+            nonce: nonce,
+            authenticating: authenticatedMetadata
+        )
+        let nonceData = Data(nonce)
+        guard nonceData.count == nonceByteCount, sealed.tag.count == authenticationTagByteCount else {
+            throw ContentCipherError.invalidCombinedCiphertext
+        }
+
+        // Existing envelopes stored the combined form without its leading
+        // nonce: `ciphertext || tag`. Continue writing exactly that layout.
+        return (nonceData, sealed.ciphertext + sealed.tag)
     }
 
     static func open(nonce: Data, ciphertext: Data, key: Data, authenticatedMetadata: Data) throws -> Data {
         guard key.count == keyByteCount else { throw ContentCipherError.invalidKeyLength }
-        let sealed = try AES.GCM.SealedBox(combined: nonce + ciphertext)
+        guard nonce.count == nonceByteCount else { throw ContentCipherError.invalidNonceLength }
+        guard ciphertext.count >= authenticationTagByteCount else { throw ContentCipherError.invalidCombinedCiphertext }
+        let nonceValue = try AES.GCM.Nonce(data: nonce)
+        let messageEnd = ciphertext.count - authenticationTagByteCount
+        let sealed = try AES.GCM.SealedBox(
+            nonce: nonceValue,
+            ciphertext: Data(ciphertext.prefix(messageEnd)),
+            tag: Data(ciphertext.suffix(authenticationTagByteCount))
+        )
         return try AES.GCM.open(sealed, using: SymmetricKey(data: key), authenticating: authenticatedMetadata)
     }
 }

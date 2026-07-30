@@ -32,6 +32,15 @@ final class FirestoreEnvelopeCodecTests: XCTestCase {
         }
     }
 
+    func testMalformedOptionalDeletedAtIsRejectedInsteadOfTreatedAsAbsent() {
+        var document = FirestoreEnvelopeCodec.documentData(for: makeEnvelope())
+        document["deletedAtMs"] = "not-a-number"
+
+        XCTAssertThrowsError(try FirestoreEnvelopeCodec.envelope(from: document)) { error in
+            XCTAssertEqual(error as? CloudSyncError, .malformedEnvelope)
+        }
+    }
+
     private func makeEnvelope() -> EncryptedRecordEnvelope {
         let id = UUID(uuidString: "00000000-0000-0000-0000-000000000011")!
         let deviceID = UUID(uuidString: "00000000-0000-0000-0000-000000000022")!

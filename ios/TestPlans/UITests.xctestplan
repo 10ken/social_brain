@@ -1,0 +1,42 @@
+{
+  "configurations" : [
+    {
+      "id" : "3A77812E-1C37-4A8C-9F7C-5BDE139CB861",
+      "name" : "UI Tests",
+      "options" : {
+        "environmentVariableEntries" : [
+          {
+            "key" : "SOCIAL_BRAIN_RUNTIME",
+            "value" : "local",
+            "isEnabled" : true
+          },
+          {
+            "key" : "SOCIAL_BRAIN_UI_TESTING",
+            "value" : "YES",
+            "isEnabled" : true
+          },
+          {
+            "key" : "SOCIAL_BRAIN_USE_IN_MEMORY_STORE",
+            "value" : "YES",
+            "isEnabled" : true
+          }
+        ],
+        "testTimeoutsEnabled" : true
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : true
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:SocialBrain.xcodeproj",
+        "identifier" : "28A74FECBA111CA2614C4A40",
+        "name" : "SocialBrainUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
